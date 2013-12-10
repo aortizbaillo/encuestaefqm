@@ -57,7 +57,8 @@ public class PreguntaBean {
 
     @Override
     public String toString() {
-        return pregunta+" "+tipo;
+        if (dependenciaNum == null) return pregunta+" "+tipo;
+        else return pregunta+" "+tipo+" - Dependencia con "+dependenciaNum;
     }
     
     

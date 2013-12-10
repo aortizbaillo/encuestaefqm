@@ -74,7 +74,10 @@ public class DataExtraction {
             PreguntaBean pb = new PreguntaBean(campos[i].substring(posPregunta+1, posPregunta+3), null);
             if (!preguntas[pos].contains(pb)) {
                 int posTipo = campos[i].indexOf("_");
-                pb = new PreguntaBean(campos[i].substring(posPregunta+1, posPregunta+3), campos[i].substring(posTipo+2,posTipo+3));
+                int posDependencia = campos[i].indexOf("*");
+                //Si no hay dependencia
+                if (posDependencia == -1) pb = new PreguntaBean(campos[i].substring(posPregunta+1, posPregunta+3), campos[i].substring(posTipo+2,posTipo+3));
+                else pb = new PreguntaBean(campos[i].substring(posPregunta+1, posPregunta+3), campos[i].substring(posTipo+2,posTipo+3), campos[i].substring(posDependencia+4,posDependencia+6));
                 preguntas[pos].add(pb);
             }
         }
