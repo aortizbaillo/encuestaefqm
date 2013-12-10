@@ -20,7 +20,7 @@ public class DataExtraction {
     public static final String[] TIPOS_USUARIOS_ANALIZADOS = {"P","D","S","O"};
     public static final int NUM_INICIAL = 9; //Los anteriores valores de columnas no son útiles
     private ArrayList<String>[] nombresAnalizados;
-    private ArrayList<String> preguntas;
+    private ArrayList<String>[] preguntas;
     private File fichero;
     
     public DataExtraction(File fichero) {
@@ -28,8 +28,11 @@ public class DataExtraction {
        
         //Generamos nuestro array de ArrayList con todos los tipos de usuarios analizados
         this.nombresAnalizados = new ArrayList[TIPOS_USUARIOS_ANALIZADOS.length];
+        this.preguntas = new ArrayList[TIPOS_USUARIOS_ANALIZADOS.length];
+
         for (int i = 0; i < nombresAnalizados.length; i++) {
             nombresAnalizados[i] = new ArrayList<>();
+            preguntas[i] = new ArrayList<>();
         }
     }
     
@@ -47,20 +50,26 @@ public class DataExtraction {
         return -1;
     }
 
+    /**
+     * Este método permite obtener nuestro listado de participantes y de preguntas para todos ellos
+     * @throws Exception 
+     */
     public void analizaResponsables() throws Exception {
         BufferedReader br = new BufferedReader(new FileReader(fichero));
         String cadena = br.readLine();
         String[] campos = cadena.split("\t");
         int i = NUM_INICIAL;
         for (; i < campos.length; i++) {
+            int pos = obtenerPosicionTipoAnalizado(campos[i]);
             //Solo tenemos que recoger nombres si el elmento contiene un >
             if (campos[i].contains(">")) {
-                int pos = obtenerPosicionTipoAnalizado(campos[i]);
                 if (pos!=-1) {                   
                     if (!nombresAnalizados[pos].contains((campos[i].split(">"))[1]))  nombresAnalizados[pos].add((campos[i].split(">"))[1]);
                 }
             }
-            
+            //Recogemos las preguntas que tiene cada apartado (profesores, eq. directivo, secretaría y orientación).
+            int posPregunta = campos[i].indexOf("-");
+            if (!preguntas[pos].contains(campos[i].substring(posPregunta+1, posPregunta+3))) preguntas[pos].add(campos[i].substring(posPregunta+1, posPregunta+3));
         }
         br.close();
     }
@@ -139,4 +148,15 @@ public class DataExtraction {
         if (pos!=-1) return nombresAnalizados[pos];
         return null;
     }
+
+    public ArrayList<String>[] getPreguntas() {
+        return preguntas;
+    }
+    
+    public ArrayList<String> getPregunta(String campo) {
+        int pos = obtenerPosicionTipoAnalizado(campo);
+        if (pos!=-1) return preguntas[pos];
+        return null;
+    }
+    
 }

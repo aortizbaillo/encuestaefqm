@@ -42,8 +42,31 @@ public class Main {
         for (String profe : de.getNombreAnalizado("O")) {
             System.out.println(profe);
         }
+        System.out.println("****************************************");
+        
+        System.out.println("Profesores");
+        for (String profe : de.getPregunta("P")) {
+            System.out.println(profe);
+        }
         System.out.println("-----------------------------");
         
+        System.out.println("Equipo Directivo");
+        for (String profe : de.getPregunta("D")) {
+            System.out.println(profe);
+        }
+        System.out.println("-----------------------------");
+        
+        System.out.println("Secretaría");
+        for (String profe : de.getPregunta("S")) {
+            System.out.println(profe);
+        }
+        System.out.println("-----------------------------");
+        
+        System.out.println("Orientación");
+        for (String profe : de.getPregunta("O")) {
+            System.out.println(profe);
+        }
+        System.out.println("-----------------------------");
     }
     
 }
