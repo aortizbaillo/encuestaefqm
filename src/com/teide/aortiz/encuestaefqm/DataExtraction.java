@@ -6,6 +6,7 @@ package com.teide.aortiz.encuestaefqm;
  */
 
 
+import com.teide.aortiz.encuestaefqm.bean.PreguntaBean;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -20,7 +21,7 @@ public class DataExtraction {
     public static final String[] TIPOS_USUARIOS_ANALIZADOS = {"P","D","S","O"};
     public static final int NUM_INICIAL = 9; //Los anteriores valores de columnas no son útiles
     private ArrayList<String>[] nombresAnalizados;
-    private ArrayList<String>[] preguntas;
+    private ArrayList<PreguntaBean>[] preguntas;
     private File fichero;
     
     public DataExtraction(File fichero) {
@@ -67,9 +68,15 @@ public class DataExtraction {
                     if (!nombresAnalizados[pos].contains((campos[i].split(">"))[1]))  nombresAnalizados[pos].add((campos[i].split(">"))[1]);
                 }
             }
-            //Recogemos las preguntas que tiene cada apartado (profesores, eq. directivo, secretaría y orientación).
+            //Recogemos las preguntas y el tipo que tiene cada apartado (profesores, eq. directivo, secretaría y orientación).
             int posPregunta = campos[i].indexOf("-");
-            if (!preguntas[pos].contains(campos[i].substring(posPregunta+1, posPregunta+3))) preguntas[pos].add(campos[i].substring(posPregunta+1, posPregunta+3));
+            //Creamos el bean para la comparación
+            PreguntaBean pb = new PreguntaBean(campos[i].substring(posPregunta+1, posPregunta+3), null);
+            if (!preguntas[pos].contains(pb)) {
+                int posTipo = campos[i].indexOf("_");
+                pb = new PreguntaBean(campos[i].substring(posPregunta+1, posPregunta+3), campos[i].substring(posTipo+2,posTipo+3));
+                preguntas[pos].add(pb);
+            }
         }
         br.close();
     }
@@ -149,11 +156,11 @@ public class DataExtraction {
         return null;
     }
 
-    public ArrayList<String>[] getPreguntas() {
+    public ArrayList<PreguntaBean>[] getPreguntas() {
         return preguntas;
     }
     
-    public ArrayList<String> getPregunta(String campo) {
+    public ArrayList<PreguntaBean> getPregunta(String campo) {
         int pos = obtenerPosicionTipoAnalizado(campo);
         if (pos!=-1) return preguntas[pos];
         return null;

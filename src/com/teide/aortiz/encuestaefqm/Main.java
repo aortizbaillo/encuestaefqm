@@ -6,6 +6,7 @@
 
 package com.teide.aortiz.encuestaefqm;
 
+import com.teide.aortiz.encuestaefqm.bean.PreguntaBean;
 import java.io.File;
 import java.util.ArrayList;
 
@@ -45,25 +46,25 @@ public class Main {
         System.out.println("****************************************");
         
         System.out.println("Profesores");
-        for (String profe : de.getPregunta("P")) {
+        for (PreguntaBean profe : de.getPregunta("P")) {
             System.out.println(profe);
         }
         System.out.println("-----------------------------");
         
         System.out.println("Equipo Directivo");
-        for (String profe : de.getPregunta("D")) {
+        for (PreguntaBean profe : de.getPregunta("D")) {
             System.out.println(profe);
         }
         System.out.println("-----------------------------");
         
         System.out.println("Secretaría");
-        for (String profe : de.getPregunta("S")) {
+        for (PreguntaBean profe : de.getPregunta("S")) {
             System.out.println(profe);
         }
         System.out.println("-----------------------------");
         
         System.out.println("Orientación");
-        for (String profe : de.getPregunta("O")) {
+        for (PreguntaBean profe : de.getPregunta("O")) {
             System.out.println(profe);
         }
         System.out.println("-----------------------------");
