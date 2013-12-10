@@ -67,7 +67,9 @@ public class Main {
         for (PreguntaBean profe : de.getPregunta("O")) {
             System.out.println(profe);
         }
-        System.out.println("-----------------------------");
+        System.out.println("*****************************************");
+        
+        de.analizarRespuestas();
     }
     
 }

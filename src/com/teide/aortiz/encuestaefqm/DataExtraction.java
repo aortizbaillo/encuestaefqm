@@ -20,6 +20,7 @@ public class DataExtraction {
 
     public static final String[] TIPOS_USUARIOS_ANALIZADOS = {"P","D","S","O"};
     public static final int NUM_INICIAL = 9; //Los anteriores valores de columnas no son útiles
+    private int[] respuestaPorCliente;
     private ArrayList<String>[] nombresAnalizados;
     private ArrayList<PreguntaBean>[] preguntas;
     private File fichero;
@@ -80,6 +81,68 @@ public class DataExtraction {
                 else pb = new PreguntaBean(campos[i].substring(posPregunta+1, posPregunta+3), campos[i].substring(posTipo+2,posTipo+3), campos[i].substring(posDependencia+4,posDependencia+6));
                 preguntas[pos].add(pb);
             }
+        }
+        br.close();
+    }
+    
+    /**
+     * Este método permite obtener cuántas respuestas va a contestar cada usuario.
+     * Generará un array de enteros con las respuestas por cada tipo. En la posición 0 irán los profesores
+     * en la 1 equipo docente, en la dos secretaría y en la tres orientación
+     * @param respuesta representa una respuesta de cualquier usuarios
+
+     */
+    private void obtenerNumeroRespuestasPorUsuario (String respuesta) {
+        respuestaPorCliente = new int[TIPOS_USUARIOS_ANALIZADOS.length];
+        for (int i = 0; i < respuestaPorCliente.length; i++) {
+            int total = 0;
+            ArrayList<PreguntaBean> preguntasTipo = preguntas[i];
+            for (PreguntaBean pb : preguntasTipo) {
+                //Las preguntas tipo Likert se responden por cada participante, así que si es tipo likert
+                //no solo recibiremos una respuesta
+                if (pb.getTipo().equals("L")) total+=nombresAnalizados[i].size();
+                else total++;
+            }
+            respuestaPorCliente[i]=total;
+            System.out.println("Tipo "+i+" total: "+respuestaPorCliente[i]);
+        }
+    }
+    
+    private ArrayList<String>[] analizarRespuesta (String respuesta) {
+        //Definimos el array de arraylist con las respuestas del usuario
+        ArrayList<String>[] respuestaUsuario = new ArrayList[respuestaPorCliente.length];
+        for (int i = 0; i < respuestaUsuario.length; i++) {
+            respuestaUsuario[i] = new ArrayList<>();
+        }
+        String[] campos = respuesta.split("\t");
+        int pos = NUM_INICIAL;
+                
+        for (int i=0;i<respuestaPorCliente.length;i++) {
+           for (int j=0;j<respuestaPorCliente[i];j++) {
+               if (pos<campos.length) respuestaUsuario[i].add(campos[pos++]);
+           }
+       }
+       return respuestaUsuario;
+    }
+    
+    public void analizarRespuestas () throws Exception {
+        BufferedReader br = new BufferedReader(new FileReader(fichero));
+        //Leemos la primera en vacío porque está la cabecera
+        br.readLine();
+        String cadena;
+        boolean primeraRespuesta = true;
+        while ((cadena=br.readLine())!= null) {
+            if (primeraRespuesta) {
+                obtenerNumeroRespuestasPorUsuario(cadena);
+                primeraRespuesta = false;
+            }
+            ArrayList<String>[] respuestaAlumno = analizarRespuesta(cadena);
+            for (ArrayList<String> respuestas : respuestaAlumno) {
+                for (String string : respuestas) {
+                    System.out.println(string);
+                }
+            }
+            System.out.println("-------------------------------");
         }
         br.close();
     }
