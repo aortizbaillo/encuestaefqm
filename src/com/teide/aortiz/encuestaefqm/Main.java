@@ -6,8 +6,11 @@
 
 package com.teide.aortiz.encuestaefqm;
 
+import com.teide.aortiz.encuestaefqm.util.DataExtraction;
 import com.teide.aortiz.encuestaefqm.bean.PreguntaBean;
+import com.teide.aortiz.encuestaefqm.bean.bbdd.DataBaseUtil;
 import java.io.File;
+import java.sql.SQLException;
 import java.util.ArrayList;
 
 /**
@@ -17,59 +20,47 @@ import java.util.ArrayList;
 public class Main {
     
     public static final String RUTA = "/Users/antonio/Dropbox/2DAM.csv";
+    public static final String CURSO = "13/14";
     
-    public static void main(String[] args) throws Exception {
-        DataExtraction de = new DataExtraction(new File (RUTA));
-        de.analizaResponsables();
-        System.out.println("Profesores");
-        for (String profe : de.getNombreAnalizado("P")) {
-            System.out.println(profe);
-        }
-        System.out.println("-----------------------------");
+    public static void main(String[] args) {
         
-        System.out.println("Equipo Directivo");
-        for (String profe : de.getNombreAnalizado("D")) {
-            System.out.println(profe);
+        try {
+            //Este objeto nos permitirá realizar todas las acciones sobre BBDD
+            DataBaseUtil dbu = new DataBaseUtil();
+            
+            DataExtraction de = new DataExtraction(new File (RUTA), CURSO);
+            
+            //En primer lugar insertaremos los responsables genéricos
+            dbu.insertaResponsablesGenericos();            
+            
+            //Analizamos el CSV en busca de los responsables que se han encuestado en ese ciclo y curso
+            de.analizaResponsables();
+
+            //Insertamos el ciclo y curso que vamos a analizar
+            dbu.insertarCiclo(de.getCiclo(), de.getCurso());
+            
+            //Insertamos los responsables
+            dbu.insertarResponsables(de.getNombresAnalizados());
+            
+            //Insertamos los encuestados
+            dbu.insertarEncuestados(de.getNombresAnalizados(), de.getCiclo(), de.getCurso());
+
+            //Insertamos y analizamos todas las respuestas
+            de.analizarRespuestas(dbu);
         }
-        System.out.println("-----------------------------");
-        
-        System.out.println("Secretaría");
-        for (String profe : de.getNombreAnalizado("S")) {
-            System.out.println(profe);
+        catch (ClassNotFoundException e) {
+            System.out.println("Error de driver");
         }
-        System.out.println("-----------------------------");
-        
-        System.out.println("Orientación");
-        for (String profe : de.getNombreAnalizado("O")) {
-            System.out.println(profe);
+        catch (SQLException e) {
+            System.out.println("Error de BBDD: "+e.getMessage());
+            e.printStackTrace();
         }
-        System.out.println("****************************************");
-        
-        System.out.println("Profesores");
-        for (PreguntaBean profe : de.getPregunta("P")) {
-            System.out.println(profe);
+        catch (Exception e) {
+            System.out.println("Error al leer el CSV: "+e.getMessage());
+            e.printStackTrace();
         }
-        System.out.println("-----------------------------");
         
-        System.out.println("Equipo Directivo");
-        for (PreguntaBean profe : de.getPregunta("D")) {
-            System.out.println(profe);
-        }
-        System.out.println("-----------------------------");
         
-        System.out.println("Secretaría");
-        for (PreguntaBean profe : de.getPregunta("S")) {
-            System.out.println(profe);
-        }
-        System.out.println("-----------------------------");
-        
-        System.out.println("Orientación");
-        for (PreguntaBean profe : de.getPregunta("O")) {
-            System.out.println(profe);
-        }
-        System.out.println("*****************************************");
-        
-        de.analizarRespuestas();
     }
     
 }
