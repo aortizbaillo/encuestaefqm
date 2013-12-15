@@ -47,17 +47,21 @@ public class Main {
 
             //Insertamos y analizamos todas las respuestas
             de.analizarRespuestas(dbu);
+            
+            //Insertamos todas las medias de las preguntas tipo Likert
+            dbu.insertarMedias(de.getCiclo(), de.getCurso());
+            
+            //Insertamos los porcentajes de las respuestas tipo SI/NO
+            dbu.insertaPorcentajes(de.getCiclo(), de.getCurso());
         }
         catch (ClassNotFoundException e) {
             System.out.println("Error de driver");
         }
         catch (SQLException e) {
             System.out.println("Error de BBDD: "+e.getMessage());
-            e.printStackTrace();
         }
         catch (Exception e) {
             System.out.println("Error al leer el CSV: "+e.getMessage());
-            e.printStackTrace();
         }
         
         

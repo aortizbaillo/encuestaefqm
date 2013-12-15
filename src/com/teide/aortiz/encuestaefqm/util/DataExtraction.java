@@ -248,69 +248,6 @@ public class DataExtraction {
         else return TIPOS_USUARIOS_ANALIZADOS[posEnTipo];
     }
     
-    /*
-
-    private void numberQuestionSearch(File f) throws Exception {
-        BufferedReader br = new BufferedReader(new FileReader(f));
-        String cadena = br.readLine();
-        String[] campos = cadena.split("\t");
-        this.questionNumber = new ArrayList<>();
-        int i = NUM_INICIAL; // Leemos a partir del 9 los profes
-        while (i < campos.length) {
-            this.questionNumber.add((campos[i].split("_"))[0]);
-            i = i + profes.size();
-        }
-        br.close();
-    }
-
-    public String fileNameSearch(File f) {
-        return (f.getName().split("\\."))[0];
-    }
-    
-    /*
-
-    public ArrayList<Respuesta> rowExtraction(File f, String year) throws Exception {
-      
-        numberQuestionSearch(f);
-
-        BufferedReader br = new BufferedReader(new FileReader(f));
-        String cadena = br.readLine();
-        ArrayList<Respuesta> resArrayList = new ArrayList<>();
-
-        // lectura de la primera fila
-
-        while ((cadena = br.readLine()) != null)  {
-            if (!cadena.isEmpty()) {
-                String[] campos = cadena.split("\t");
-                int j=0;
-                for (int i = NUM_INICIAL; i < campos.length - 1; i++) {
-                    // completamos el objetos
-                    // ROOT    if (profes.get(j).startsWith("Luis")) val = "4";
-                    Respuesta res = new Respuesta();
-                    res.setNombreProfesor(profes.get(j++));
-                    res.setNombreCurso(this.fileNameSearch(f));
-                    res.setPregunta(questionNumber.get((i-9)/profes.size()));
-                    res.setValoracion(campos[i]);
-                    res.setYear(year);
-                    //Meter la respuesta al ArrayList
-                    resArrayList.add(res);
-                    if (j==profes.size()) j=0;
-                }
-                //Para la última pregunta del cuestionario ... Respuesta del alumno AL CURSO, no por profesor
-                Respuesta res = new Respuesta();
-                res.setNombreProfesor(this.fileNameSearch(f));
-                res.setNombreCurso(this.fileNameSearch(f));
-                res.setPregunta(questionNumber.get(questionNumber.size()-1));
-                res.setValoracion(campos[campos.length-1]);
-                //Meter la respuesta al ArrayList
-                resArrayList.add(res);
-            }
-        }
-
-        return resArrayList;
-    }
-    */
-
     public ArrayList<String>[] getNombresAnalizados() {
         return nombresAnalizados;
     }

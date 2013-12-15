@@ -6,10 +6,12 @@
 
 package com.teide.aortiz.encuestaefqm.bean.bbdd;
 
+import com.teide.aortiz.encuestaefqm.bean.MediaBean;
 import com.teide.aortiz.encuestaefqm.util.DataExtraction;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 
@@ -30,6 +32,16 @@ public class DataBaseUtil {
     public static final String INSERT_ENCUESTADOS = "insert into encuestado values (?,?,?,?)";
     public static final String INSERT_PREGUNTA = "insert into pregunta (num,tipo,respuesta,ciclo,curso,nombreResponsable,tipoResponsable) "
             + "values (?,?,?,?,?,?,?)";
+    public static final String INSERT_MEDIA = "insert into media (num,tipo,media,ciclo,curso,nombreResponsable,tipoResponsable) values (?,?,?,?,?,?,?)";
+    public static final String INSERT_PORCENTAJE = "insert into media (num,tipo,media,respuesta,ciclo,curso,nombreResponsable,tipoResponsable) values (?,?,?,?,?,?,?,?)";
+   
+    
+    public static final String CALCULATE_MEDIA_BY_QUESTION = "select num,tipo,avg(respuesta),ciclo,curso,nombreResponsable,tipoResponsable from pregunta group by num, nombreResponsable,tipoResponsable \n" +
+                                                             "having ciclo=? and curso=? and tipo='L'";
+    public static final String CALCULATE_PERCENTAGE = "select num,tipo,count(respuesta),ciclo,curso,nombreResponsable,tipoResponsable from pregunta group by num,nombreResponsable,respuesta\n" +
+                                                          "having ciclo=? and curso=? and tipo='S' and respuesta=?";
+    public static final String COUNT_ANSWER = "select count(respuesta),ciclo,curso,tipo from pregunta group by num,nombreResponsable\n" +
+                                              "having ciclo=? and curso=? and tipo='S'";
     
     private Connection conection;
     
@@ -174,6 +186,142 @@ public class DataBaseUtil {
         ps.setString(6, nombreResponsable);
         ps.setString(7, tipoResponsable);
         return ps.executeUpdate();
+    }
+    
+    /**
+     * Este método permite obtener y generar las medias de todas las preguntas tipo Likert por pregunta, profesor y tipo
+     * @param ciclo representa el ciclo del que se generarán las medias
+     * @param curso representa el curso del que se generarán las medias
+     * @return un ArrayList de medias
+     * @throws SQLException si se produjera una excepción durante la búsqueda
+     */
+    private ArrayList<MediaBean> obtenerMedias (String ciclo, String curso) throws SQLException {
+        PreparedStatement ps = conection.prepareStatement(DataBaseUtil.CALCULATE_MEDIA_BY_QUESTION);
+        ps.setString(1, ciclo);
+        ps.setString(2, curso);
+        ResultSet rs = ps.executeQuery();
+        ArrayList<MediaBean> listado = new ArrayList<>();
+        while (rs.next()) {
+            MediaBean mb = new MediaBean();
+            mb.setNum(rs.getString("num"));
+            mb.setTipo(rs.getString("tipo"));
+            mb.setMedia(rs.getDouble("avg(respuesta)"));
+            mb.setCiclo(rs.getString("ciclo"));
+            mb.setCurso(rs.getString("curso"));
+            mb.setNombreResponsable(rs.getString("nombreResponsable"));
+            mb.setTipoResponsable(rs.getString("tipoResponsable"));
+            listado.add(mb);
+        }
+        return listado;
+    }
+    
+     /**
+     * Este método permite obtener y generar los porcentajes de todas las preguntas tipo SI/NO por pregunta, profesor y tipo
+     * @param ciclo representa el ciclo del que se generarán las medias
+     * @param curso representa el curso del que se generarán las medias
+     * @return un ArrayList de medias
+     * @throws SQLException si se produjera una excepción durante la búsqueda
+     */
+    private ArrayList<MediaBean> obtenerPorcentajes (String ciclo, String curso) throws SQLException {
+        //Primero obtendremos el número de respuestas de la encuesta
+        PreparedStatement ps = conection.prepareStatement(DataBaseUtil.COUNT_ANSWER);
+        ps.setString(1, ciclo);
+        ps.setString(2, curso);
+        ResultSet rs = ps.executeQuery();
+        rs.next();
+        int totalRespuestas = rs.getInt("count(respuesta)");
+               
+        //Ahora obtendremos el número de respuestas afirmativas
+        ps = conection.prepareStatement(DataBaseUtil.CALCULATE_PERCENTAGE);
+        ps.setString(1, ciclo);
+        ps.setString(2, curso);
+        ps.setString(3, DataExtraction.SI);
+        rs = ps.executeQuery();
+        ArrayList<MediaBean> listado = new ArrayList<>();
+        while (rs.next()) {
+            //Añadimos al listado el porcentaje de las respuestas afirmativas
+            MediaBean mbSi = new MediaBean();
+            mbSi.setNum(rs.getString("num"));
+            mbSi.setTipo(rs.getString("tipo"));
+            mbSi.setRespuesta(DataExtraction.SI);
+            int respuestasSI = rs.getInt("count(respuesta)");
+            mbSi.setMedia((respuestasSI*100.0)/totalRespuestas);
+            mbSi.setCiclo(rs.getString("ciclo"));
+            mbSi.setCurso(rs.getString("curso"));
+            mbSi.setNombreResponsable(rs.getString("nombreResponsable"));
+            mbSi.setTipoResponsable(rs.getString("tipoResponsable"));
+            listado.add(mbSi);
+        }
+            
+        //Ahora obtendremos el número de respuestas negativas
+        ps = conection.prepareStatement(DataBaseUtil.CALCULATE_PERCENTAGE);
+        ps.setString(1, ciclo);
+        ps.setString(2, curso);
+        ps.setString(3, DataExtraction.NO);
+        rs = ps.executeQuery();
+        while (rs.next()) {
+            MediaBean mbNo = new MediaBean();
+            mbNo.setNum(rs.getString("num"));
+            mbNo.setTipo(rs.getString("tipo"));
+            mbNo.setRespuesta(DataExtraction.NO);
+            int respuestasNo = rs.getInt("count(respuesta)");
+            mbNo.setMedia((respuestasNo*100.0)/totalRespuestas);
+            mbNo.setCiclo(rs.getString("ciclo"));
+            mbNo.setCurso(rs.getString("curso"));
+            mbNo.setNombreResponsable(rs.getString("nombreResponsable"));
+            mbNo.setTipoResponsable(rs.getString("tipoResponsable"));
+            listado.add(mbNo);
+        }
+        return listado;
+    }
+    
+    /**
+     * Este método permite insertar todas las medias de las preguntas Likert en la BBDD
+     * @param ciclo representa el ciclo sobre el que se insertarán las medias
+     * @param curso representa el curso sobre el que se insertarán las medias
+     * @return el total de medias insertadas
+     * @throws SQLException si se produjera un error de BBDD
+     */
+    public int insertarMedias (String ciclo, String curso) throws SQLException {
+        ArrayList<MediaBean> listado = obtenerMedias(ciclo, curso);
+        PreparedStatement ps = conection.prepareStatement(DataBaseUtil.INSERT_MEDIA);
+        int total = 0;
+        for (MediaBean mb : listado) {
+            ps.setString(1, mb.getNum());
+            ps.setString(2, mb.getTipo());
+            ps.setDouble(3, mb.getMedia());
+            ps.setString(4, mb.getCiclo());
+            ps.setString(5, mb.getCurso());
+            ps.setString(6, mb.getNombreResponsable());
+            ps.setString(7, mb.getTipoResponsable());
+            total+=ps.executeUpdate();
+        }
+        return total;
+    }
+    
+    /**
+     * Este método insertará en BBDD todos los porcentajes de las respuestas afirmativas y negativas
+     * @param ciclo representa el ciclo que se insertará
+     * @param curso representa el curso que se insertará
+     * @return el número de porcentajes insertados
+     * @throws SQLException si se produjera un error de BBDD
+     */
+    public int insertaPorcentajes (String ciclo, String curso) throws SQLException {
+        ArrayList<MediaBean> listado = obtenerPorcentajes(ciclo, curso);
+        PreparedStatement ps = conection.prepareStatement(DataBaseUtil.INSERT_PORCENTAJE);
+        int total = 0;
+        for (MediaBean mb : listado) {
+            ps.setString(1, mb.getNum());
+            ps.setString(2, mb.getTipo());
+            ps.setDouble(3, mb.getMedia());
+            ps.setString(4, mb.getRespuesta());
+            ps.setString(5, mb.getCiclo());
+            ps.setString(6, mb.getCurso());
+            ps.setString(7, mb.getNombreResponsable());
+            ps.setString(8, mb.getTipoResponsable());
+            total+=ps.executeUpdate();
+        }
+        return total;
     }
     
     
