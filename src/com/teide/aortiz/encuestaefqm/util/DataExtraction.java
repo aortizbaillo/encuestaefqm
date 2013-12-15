@@ -21,11 +21,15 @@ public class DataExtraction {
 
     public static final String[] TIPOS_USUARIOS_ANALIZADOS = {"P","D","S","O"};
     public static final int NUM_INICIAL = 9; //Los anteriores valores de columnas no son útiles
+    public static final String SI = "1";
+    public static final String NO = "0";
+    
     private int[] respuestaPorCliente;
     private ArrayList<String>[] nombresAnalizados;
     private ArrayList<PreguntaBean>[] preguntas;
     private File fichero;
     private String ciclo, curso;
+    
     
     public DataExtraction(File fichero, String curso) {
         this.fichero = fichero;
@@ -180,19 +184,48 @@ public class DataExtraction {
                             posPreguntaBean++;
                         }
                     }
-                    else posLikert = 0;
-                    String nombreResponsable = obtenerNombreResponsableParaInsertar(i, j, pb);
-                    System.out.println("Pregunta: "+pb.getPregunta());
-                    System.out.println("Tipo: "+pb.getTipo());
-                    System.out.println("Respuesta: "+respuestasPorTipo.get(j));
-                    System.out.println("Ciclo: "+ciclo);
-                    System.out.println("Curso: "+curso);
-                    System.out.println("Responsable: "+nombreResponsable);
-                    System.out.println("Tipo Responsable: "+TIPOS_USUARIOS_ANALIZADOS[i]);
-                    System.out.println("----------------------------------------------------");
-                    
-                    dbu.insertaPregunta(pb.getPregunta(), pb.getTipo(), respuestasPorTipo.get(j), ciclo, curso, 
+                    else {
+                        posLikert = 0;
+                        posPreguntaBean++;
+                    }
+                    //Comprobaremos si la pregunta tiene dependencias con otras
+                    if (pb.getDependenciaNum()!=null) {
+                        int posDependencia = Integer.parseInt(pb.getDependenciaNum())-1;
+                        if (respuestasPorTipo.get(posDependencia).equals(DataExtraction.SI)) {
+                            System.out.println("Pregunta con Dependencia válida");
+                            String nombreResponsable = obtenerNombreResponsableParaInsertar(i, j, pb);
+                            //Insertaremos en BBDD siempre y cuando haya respuesta
+                            //Así evitaremos insertar respuestas tipo texto sin información
+                            if (!respuestasPorTipo.get(j).trim().isEmpty()) dbu.insertaPregunta(pb.getPregunta(), pb.getTipo(), respuestasPorTipo.get(j), ciclo, curso, 
                             nombreResponsable, TIPOS_USUARIOS_ANALIZADOS[i]);
+                            
+                            System.out.println("Pregunta: "+pb.getPregunta());
+                            System.out.println("Tipo: "+pb.getTipo());
+                            System.out.println("Respuesta: "+respuestasPorTipo.get(j));
+                            System.out.println("Ciclo: "+ciclo);
+                            System.out.println("Curso: "+curso);
+                            System.out.println("Responsable: "+nombreResponsable);
+                            System.out.println("Tipo Responsable: "+TIPOS_USUARIOS_ANALIZADOS[i]);
+                            System.out.println("----------------------------------------------------");
+                        }
+                        else System.out.println("Pregunta con dependencia no válida");
+                    }
+                    else {
+                        String nombreResponsable = obtenerNombreResponsableParaInsertar(i, j, pb);
+                        //Insertaremos en BBDD siempre y cuando haya respuesta
+                        //Así evitaremos insertar respuestas tipo texto sin información
+                        if (!respuestasPorTipo.get(j).trim().isEmpty()) dbu.insertaPregunta(pb.getPregunta(), pb.getTipo(), respuestasPorTipo.get(j), ciclo, curso, 
+                            nombreResponsable, TIPOS_USUARIOS_ANALIZADOS[i]);
+                        
+                        System.out.println("Pregunta: "+pb.getPregunta());
+                        System.out.println("Tipo: "+pb.getTipo());
+                        System.out.println("Respuesta: "+respuestasPorTipo.get(j));
+                        System.out.println("Ciclo: "+ciclo);
+                        System.out.println("Curso: "+curso);
+                        System.out.println("Responsable: "+nombreResponsable);
+                        System.out.println("Tipo Responsable: "+TIPOS_USUARIOS_ANALIZADOS[i]);
+                        System.out.println("----------------------------------------------------");
+                    }
                 }
             }
         }
