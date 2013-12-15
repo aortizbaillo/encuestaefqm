@@ -6,9 +6,14 @@
 
 package com.teide.aortiz.encuestaefqm;
 
+import static com.teide.aortiz.encuestaefqm.Main.CURSO;
+import static com.teide.aortiz.encuestaefqm.Main.RUTA;
+import com.teide.aortiz.encuestaefqm.bean.bbdd.DataBaseUtil;
+import com.teide.aortiz.encuestaefqm.util.DataExtraction;
+import java.io.File;
+import java.sql.SQLException;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
-import javax.swing.filechooser.FileNameExtensionFilter;
 
 /**
  *
@@ -36,6 +41,8 @@ public class PrincipalFrame extends javax.swing.JFrame {
         btnSeleccionar = new javax.swing.JButton();
         jLabel2 = new javax.swing.JLabel();
         año = new javax.swing.JFormattedTextField();
+        jScrollPane1 = new javax.swing.JScrollPane();
+        area = new javax.swing.JTextArea();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -57,6 +64,12 @@ public class PrincipalFrame extends javax.swing.JFrame {
         }
         año.setHorizontalAlignment(javax.swing.JTextField.CENTER);
 
+        area.setEditable(false);
+        area.setColumns(20);
+        area.setRows(5);
+        area.setEnabled(false);
+        jScrollPane1.setViewportView(area);
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -64,13 +77,16 @@ public class PrincipalFrame extends javax.swing.JFrame {
             .addGroup(layout.createSequentialGroup()
                 .addGap(59, 59, 59)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jLabel1)
-                    .addComponent(jLabel2))
-                .addGap(58, 58, 58)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(btnSeleccionar)
-                    .addComponent(año, javax.swing.GroupLayout.PREFERRED_SIZE, 64, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(328, Short.MAX_VALUE))
+                    .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 709, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addGroup(layout.createSequentialGroup()
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jLabel1)
+                            .addComponent(jLabel2))
+                        .addGap(58, 58, 58)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(btnSeleccionar)
+                            .addComponent(año, javax.swing.GroupLayout.PREFERRED_SIZE, 64, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                .addContainerGap(56, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -83,7 +99,9 @@ public class PrincipalFrame extends javax.swing.JFrame {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel1)
                     .addComponent(btnSeleccionar))
-                .addContainerGap(326, Short.MAX_VALUE))
+                .addGap(34, 34, 34)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 259, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(33, Short.MAX_VALUE))
         );
 
         pack();
@@ -99,13 +117,96 @@ public class PrincipalFrame extends javax.swing.JFrame {
             jfc.setDialogTitle("Seleccione la carpeta que contenga todos los CSV");
             int opcion = jfc.showOpenDialog(this);
             if (opcion == JFileChooser.APPROVE_OPTION) {
-                
+                //Inicializando la encuesta
+                inicializaEncuesta();
+                area.append("Inicializando la encuesta ....\n");
+                area.append("--------------------------------------------------\n");
+
+                File dir = jfc.getSelectedFile();
+                String[] ficheros = dir.list();
+                for (String nombreFichero : ficheros) {
+                    File fichero = new File (dir,nombreFichero);
+                    //Solamente nos valdrán los ficheros con extesión CSV
+                    if (fichero.isFile() && obtenerExtensionFichero(fichero).equalsIgnoreCase("csv")) {
+                        area.append("Procesando el fichero "+fichero.getName()+"\n");
+                        gestionaEncuesta(fichero, año.getText());
+                        area.append("Fichero procesado\n");
+                        area.append("--------------------------------------------------\n");
+                    }
+                }
             }
-            
-            
         }
     }//GEN-LAST:event_btnSeleccionarActionPerformed
 
+    private String obtenerExtensionFichero (File f) {
+        try {
+            return (f.getName().split("\\."))[1];
+        }
+        catch (ArrayIndexOutOfBoundsException e) {
+            return " ";
+        }
+    }
+    
+    private boolean inicializaEncuesta () {
+         try {
+            //Este objeto nos permitirá realizar todas las acciones sobre BBDD
+            DataBaseUtil dbu = new DataBaseUtil();
+                        
+            //En primer lugar insertaremos los responsables genéricos
+            dbu.insertaResponsablesGenericos();   
+            return true;
+            
+        } catch (ClassNotFoundException ex) {
+            JOptionPane.showMessageDialog(this, "Driver de la BBDD no encontrado", "Error", JOptionPane.ERROR_MESSAGE);
+        } catch (SQLException ex) {
+            JOptionPane.showMessageDialog(this, "Error de BBDD al insertar los responsables genéricos\n"+ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        }
+         return false;
+    }
+    
+    private void gestionaEncuesta (File fichero, String curso) {
+        try {
+            DataBaseUtil dbu = new DataBaseUtil();
+            DataExtraction de = new DataExtraction(fichero, curso);
+            
+            //Analizamos el CSV en busca de los responsables que se han encuestado en ese ciclo y curso
+            de.analizaResponsables();
+            area.append("Responsables analizados\n");
+
+            //Insertamos el ciclo y curso que vamos a analizar
+            dbu.insertarCiclo(de.getCiclo(), de.getCurso());
+            area.append("Ciclo Insertado\n");
+
+            //Insertamos los responsables
+            dbu.insertarResponsables(de.getNombresAnalizados());
+            area.append("Responsables insertados\n");
+
+            //Insertamos los encuestados
+            dbu.insertarEncuestados(de.getNombresAnalizados(), de.getCiclo(), de.getCurso());
+            area.append("Encuestas individuales insertadas\n");
+
+            //Insertamos y analizamos todas las respuestas
+            de.analizarRespuestas(dbu);
+
+            //Insertamos todas las medias de las preguntas tipo Likert
+            dbu.insertarMedias(de.getCiclo(), de.getCurso());
+            area.append("Medias tipo Likert calculadas e insertadas\n");
+
+            //Insertamos los porcentajes de las respuestas tipo SI/NO
+            dbu.insertaPorcentajes(de.getCiclo(), de.getCurso());
+            area.append("Porcentajes de respuestas SI/NO calculadas e insertadas\n");
+        }
+        catch (ClassNotFoundException ex) {
+            JOptionPane.showMessageDialog(this, "Driver de la BBDD no encontrado", "Error", JOptionPane.ERROR_MESSAGE);
+        } 
+        catch (SQLException ex) {
+            JOptionPane.showMessageDialog(this, "Error de BBDD\n"+ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        }
+        catch (Exception ex) {
+            JOptionPane.showMessageDialog(this, "Error\n"+ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+    
     /**
      * @param args the command line arguments
      */
@@ -142,9 +243,11 @@ public class PrincipalFrame extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JTextArea area;
     private javax.swing.JFormattedTextField año;
     private javax.swing.JButton btnSeleccionar;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
+    private javax.swing.JScrollPane jScrollPane1;
     // End of variables declaration//GEN-END:variables
 }

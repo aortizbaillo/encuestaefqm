@@ -7,11 +7,9 @@
 package com.teide.aortiz.encuestaefqm;
 
 import com.teide.aortiz.encuestaefqm.util.DataExtraction;
-import com.teide.aortiz.encuestaefqm.bean.PreguntaBean;
 import com.teide.aortiz.encuestaefqm.bean.bbdd.DataBaseUtil;
 import java.io.File;
 import java.sql.SQLException;
-import java.util.ArrayList;
 
 /**
  *

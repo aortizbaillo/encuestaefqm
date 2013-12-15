@@ -192,39 +192,19 @@ public class DataExtraction {
                     if (pb.getDependenciaNum()!=null) {
                         int posDependencia = Integer.parseInt(pb.getDependenciaNum())-1;
                         if (respuestasPorTipo.get(posDependencia).equals(DataExtraction.SI)) {
-                            System.out.println("Pregunta con Dependencia válida");
                             String nombreResponsable = obtenerNombreResponsableParaInsertar(i, j, pb);
                             //Insertaremos en BBDD siempre y cuando haya respuesta
                             //Así evitaremos insertar respuestas tipo texto sin información
-                            if (!respuestasPorTipo.get(j).trim().isEmpty()) dbu.insertaPregunta(pb.getPregunta(), pb.getTipo(), respuestasPorTipo.get(j), ciclo, curso, 
-                            nombreResponsable, TIPOS_USUARIOS_ANALIZADOS[i]);
-                            
-                            System.out.println("Pregunta: "+pb.getPregunta());
-                            System.out.println("Tipo: "+pb.getTipo());
-                            System.out.println("Respuesta: "+respuestasPorTipo.get(j));
-                            System.out.println("Ciclo: "+ciclo);
-                            System.out.println("Curso: "+curso);
-                            System.out.println("Responsable: "+nombreResponsable);
-                            System.out.println("Tipo Responsable: "+TIPOS_USUARIOS_ANALIZADOS[i]);
-                            System.out.println("----------------------------------------------------");
+                            if (!respuestasPorTipo.get(j).trim().isEmpty()) 
+                                dbu.insertaPregunta(pb.getPregunta(), pb.getTipo(), respuestasPorTipo.get(j), ciclo, curso,nombreResponsable, TIPOS_USUARIOS_ANALIZADOS[i]);    
                         }
-                        else System.out.println("Pregunta con dependencia no válida");
                     }
                     else {
                         String nombreResponsable = obtenerNombreResponsableParaInsertar(i, j, pb);
                         //Insertaremos en BBDD siempre y cuando haya respuesta
                         //Así evitaremos insertar respuestas tipo texto sin información
-                        if (!respuestasPorTipo.get(j).trim().isEmpty()) dbu.insertaPregunta(pb.getPregunta(), pb.getTipo(), respuestasPorTipo.get(j), ciclo, curso, 
-                            nombreResponsable, TIPOS_USUARIOS_ANALIZADOS[i]);
-                        
-                        System.out.println("Pregunta: "+pb.getPregunta());
-                        System.out.println("Tipo: "+pb.getTipo());
-                        System.out.println("Respuesta: "+respuestasPorTipo.get(j));
-                        System.out.println("Ciclo: "+ciclo);
-                        System.out.println("Curso: "+curso);
-                        System.out.println("Responsable: "+nombreResponsable);
-                        System.out.println("Tipo Responsable: "+TIPOS_USUARIOS_ANALIZADOS[i]);
-                        System.out.println("----------------------------------------------------");
+                        if (!respuestasPorTipo.get(j).trim().isEmpty()) 
+                            dbu.insertaPregunta(pb.getPregunta(), pb.getTipo(), respuestasPorTipo.get(j), ciclo, curso,nombreResponsable, TIPOS_USUARIOS_ANALIZADOS[i]);
                     }
                 }
             }
