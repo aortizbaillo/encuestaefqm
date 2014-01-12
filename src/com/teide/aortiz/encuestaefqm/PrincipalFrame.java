@@ -6,8 +6,6 @@
 
 package com.teide.aortiz.encuestaefqm;
 
-import static com.teide.aortiz.encuestaefqm.Main.CURSO;
-import static com.teide.aortiz.encuestaefqm.Main.RUTA;
 import com.teide.aortiz.encuestaefqm.bean.bbdd.DataBaseUtil;
 import com.teide.aortiz.encuestaefqm.util.DataExtraction;
 import java.io.File;
@@ -159,15 +157,18 @@ public class PrincipalFrame extends javax.swing.JFrame {
         } catch (ClassNotFoundException ex) {
             JOptionPane.showMessageDialog(this, "Driver de la BBDD no encontrado", "Error", JOptionPane.ERROR_MESSAGE);
         } catch (SQLException ex) {
-            JOptionPane.showMessageDialog(this, "Error de BBDD al insertar los responsables genéricos\n"+ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            //JOptionPane.showMessageDialog(this, "Error de BBDD al insertar los responsables genéricos\n"+ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
          return false;
     }
     
     private void gestionaEncuesta (File fichero, String curso) {
+        int resultado = 0;
+        DataBaseUtil dbu = null;
+        DataExtraction de = null;
         try {
-            DataBaseUtil dbu = new DataBaseUtil();
-            DataExtraction de = new DataExtraction(fichero, curso);
+            dbu = new DataBaseUtil();
+            de = new DataExtraction(fichero, curso);
             
             //Analizamos el CSV en busca de los responsables que se han encuestado en ese ciclo y curso
             de.analizaResponsables();
@@ -176,21 +177,26 @@ public class PrincipalFrame extends javax.swing.JFrame {
             //Insertamos el ciclo y curso que vamos a analizar
             dbu.insertarCiclo(de.getCiclo(), de.getCurso());
             area.append("Ciclo Insertado\n");
+            resultado = 1;
 
             //Insertamos los responsables
             dbu.insertarResponsables(de.getNombresAnalizados());
             area.append("Responsables insertados\n");
+            resultado = 2;
 
             //Insertamos los encuestados
             dbu.insertarEncuestados(de.getNombresAnalizados(), de.getCiclo(), de.getCurso());
-            area.append("Encuestas individuales insertadas\n");
+            area.append("Encuestados por ciclo insertados\n");
+            resultado = 3;
 
             //Insertamos y analizamos todas las respuestas
             de.analizarRespuestas(dbu);
+            resultado = 4;
 
             //Insertamos todas las medias de las preguntas tipo Likert
             dbu.insertarMedias(de.getCiclo(), de.getCurso());
             area.append("Medias tipo Likert calculadas e insertadas\n");
+            resultado = 5;
 
             //Insertamos los porcentajes de las respuestas tipo SI/NO
             dbu.insertaPorcentajes(de.getCiclo(), de.getCurso());
@@ -201,6 +207,15 @@ public class PrincipalFrame extends javax.swing.JFrame {
         } 
         catch (SQLException ex) {
             JOptionPane.showMessageDialog(this, "Error de BBDD\n"+ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            switch (resultado) {
+                case 0: area.append("Error: "+de.getCiclo()+"("+de.getCurso()+") ya existía\n");break;
+                case 1: area.append("Error al insertar los responsables de "+de.getCiclo()+"("+de.getCurso()+")\n");break;
+                case 2: area.append("Error al insertar los encuestados de "+de.getCiclo()+"("+de.getCurso()+")\n");break;
+                case 3: area.append("Error al insertar las respuestas de "+de.getCiclo()+"("+de.getCurso()+")\n");break;
+                case 4: area.append("Error al insertar las medias de tipo Likert de "+de.getCiclo()+"("+de.getCurso()+")\n");break;
+                case 5: area.append("Error al insertar las medias de tipo SI/NO de "+de.getCiclo()+"("+de.getCurso()+")\n");break;
+            }
+            ex.printStackTrace();
         }
         catch (Exception ex) {
             JOptionPane.showMessageDialog(this, "Error\n"+ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);

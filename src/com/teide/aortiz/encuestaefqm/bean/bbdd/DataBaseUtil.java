@@ -36,11 +36,11 @@ public class DataBaseUtil {
     public static final String INSERT_PORCENTAJE = "insert into media (num,tipo,media,respuesta,ciclo,curso,nombreResponsable,tipoResponsable) values (?,?,?,?,?,?,?,?)";
    
     
-    public static final String CALCULATE_MEDIA_BY_QUESTION = "select num,tipo,avg(respuesta),ciclo,curso,nombreResponsable,tipoResponsable from pregunta group by num, nombreResponsable,tipoResponsable \n" +
+    public static final String CALCULATE_MEDIA_BY_QUESTION = "select num,tipo,avg(respuesta),ciclo,curso,nombreResponsable,tipoResponsable from pregunta group by num, nombreResponsable,tipoResponsable,ciclo,curso \n" +
                                                              "having ciclo=? and curso=? and tipo='L'";
-    public static final String CALCULATE_PERCENTAGE = "select num,tipo,count(respuesta),ciclo,curso,nombreResponsable,tipoResponsable from pregunta group by num,nombreResponsable,respuesta\n" +
+    public static final String CALCULATE_PERCENTAGE = "select num,tipo,count(respuesta),ciclo,curso,nombreResponsable,tipoResponsable from pregunta group by num,nombreResponsable,respuesta,ciclo,curso\n" +
                                                           "having ciclo=? and curso=? and tipo='S' and respuesta=?";
-    public static final String COUNT_ANSWER = "select count(respuesta),ciclo,curso,tipo from pregunta group by num,nombreResponsable\n" +
+    public static final String COUNT_ANSWER = "select count(respuesta),ciclo,curso,tipo from pregunta group by num,nombreResponsable,ciclo,curso\n" +
                                               "having ciclo=? and curso=? and tipo='S'";
     
     private Connection conection;
@@ -124,17 +124,19 @@ public class DataBaseUtil {
      * Este método permitirá insertar todos los responsables que se analizarán para la encuesta
      * @param nombresAnalizados es un Array de ArrayList con todos los responsables organizados por tipo
      * @return el número de responsables insertados en BBDD
-     * @throws SQLException si se produjera un error de insercción
      */
-    public int insertarResponsables (ArrayList<String>[] nombresAnalizados) throws SQLException {
+    public int insertarResponsables (ArrayList<String>[] nombresAnalizados) {
         int total = 0;
         for (int i = 0; i < nombresAnalizados.length; i++) {
             ArrayList<String> listado = nombresAnalizados[i];
             for (String responsable : listado) {
-                PreparedStatement ps = conection.prepareStatement(DataBaseUtil.INSERT_RESPONSABLE);
-                ps.setString(1, responsable);
-                ps.setString(2, DataExtraction.TIPOS_USUARIOS_ANALIZADOS[i]);
-                total+=ps.executeUpdate();
+                try {
+                    PreparedStatement ps = conection.prepareStatement(DataBaseUtil.INSERT_RESPONSABLE);
+                    ps.setString(1, responsable);
+                    ps.setString(2, DataExtraction.TIPOS_USUARIOS_ANALIZADOS[i]);
+                    total+=ps.executeUpdate();
+                }
+                catch (SQLException e) {}
             }
         }
         return total;
@@ -229,8 +231,9 @@ public class DataBaseUtil {
         ps.setString(2, curso);
         ResultSet rs = ps.executeQuery();
         rs.next();
+        if (rs.isLast()) System.out.println("Última fila");
         int totalRespuestas = rs.getInt("count(respuesta)");
-               
+                       
         //Ahora obtendremos el número de respuestas afirmativas
         ps = conection.prepareStatement(DataBaseUtil.CALCULATE_PERCENTAGE);
         ps.setString(1, ciclo);
