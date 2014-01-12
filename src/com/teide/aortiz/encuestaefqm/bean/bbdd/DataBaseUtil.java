@@ -375,6 +375,10 @@ public class DataBaseUtil {
         return obtenerResponsables(curso, "S", false);
     }
     
+    public ArrayList<ResponsableBean> obtenerOrientacion (String curso) throws SQLException {
+        return obtenerResponsables(curso, "O", false);
+    }
+    
     /**
      * Este método permite obtener la media de cualquier tipo de responsable (Profesor, E.Directivo, Secretaría u Orientación)
      * @param nombreResponsable representa el nombre del responsable
@@ -424,6 +428,14 @@ public class DataBaseUtil {
         return obtenerMediasResponsables(nombreResponsable, ciclo, curso, "S","S");
     }
     
+    public ArrayList<MediaResponsableBean> obtenerMediasOrientacion (String nombreResponsable, String ciclo, String curso) throws SQLException {
+        return obtenerMediasResponsables(nombreResponsable, ciclo, curso, "O","L");
+    }
+    
+    public ArrayList<MediaResponsableBean> obtenerMediasOrientacionGenerico (String nombreResponsable, String ciclo, String curso) throws SQLException {
+        return obtenerMediasResponsables(nombreResponsable, ciclo, curso, "O","S");
+    }
+    
     /**
      * Permite obtener el listado de comentarios de texto libre de todos (Profesores, Directivos, Secretaría u Orientación).
      * @param nombreResponsable representa el nombre de responsable (tipo) de comentarios que se quiere obtener
@@ -456,5 +468,9 @@ public class DataBaseUtil {
     
     public ArrayList<ComentariosBean> obtenerComentariosSecretaria (String curso) throws SQLException {
         return obtenerComentarios("S", curso);
+    }
+    
+    public ArrayList<ComentariosBean> obtenerComentariosOrientacion (String curso) throws SQLException {
+        return obtenerComentarios("O", curso);
     }
 }

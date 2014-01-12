@@ -268,6 +268,14 @@ public class PrincipalFrame extends javax.swing.JFrame {
             gestionarExcelComentariosSecretaria(curso, eu);
             area.append("Excel de Comentarios de Secretaria creado correctamente\n");
             area.append("--------------------------------------------------\n");
+            area.append("Creando el Excel de Orientación\n");
+            gestionarExcelOrientacion(curso, eu);
+            area.append("Excel de Orientación creado correctamente\n");
+            area.append("--------------------------------------------------\n");
+            area.append("Creando el Excel de Comentarios de Orientación\n");
+            gestionarExcelComentariosOrientacion(curso, eu);
+            area.append("Excel de Comentarios de Orientación creado correctamente\n");
+            area.append("--------------------------------------------------\n");
         }
         catch (Exception e) {
            JOptionPane.showMessageDialog(this, "Error durante la creación de las hojas Excel", "Error", JOptionPane.ERROR_MESSAGE);
@@ -287,7 +295,7 @@ public class PrincipalFrame extends javax.swing.JFrame {
         eu.hojaEquipoDirectivo(curso);
     }
     
-     private void gestionarExcelComentariosEquipoDirectivo (String curso, ExcelUtil eu) throws Exception {
+    private void gestionarExcelComentariosEquipoDirectivo (String curso, ExcelUtil eu) throws Exception {
         eu.hojaComentariosEquipoDirectivo(curso);
     }
      
@@ -295,8 +303,16 @@ public class PrincipalFrame extends javax.swing.JFrame {
         eu.hojaSecretaria(curso);
     }
     
-     private void gestionarExcelComentariosSecretaria (String curso, ExcelUtil eu) throws Exception {
+    private void gestionarExcelComentariosSecretaria (String curso, ExcelUtil eu) throws Exception {
         eu.hojaComentariosSecretaria(curso);
+    }
+     
+    private void gestionarExcelOrientacion (String curso, ExcelUtil eu) throws Exception {
+        eu.hojaOrientacion(curso);
+    }
+    
+    private void gestionarExcelComentariosOrientacion (String curso, ExcelUtil eu) throws Exception {
+        eu.hojaComentariosOrientacion(curso);
     }
     /**
      * @param args the command line arguments
