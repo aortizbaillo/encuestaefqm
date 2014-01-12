@@ -6,7 +6,10 @@
 
 package com.teide.aortiz.encuestaefqm.bean.bbdd;
 
+import com.teide.aortiz.encuestaefqm.bean.ComentariosBean;
+import com.teide.aortiz.encuestaefqm.bean.ResponsableBean;
 import com.teide.aortiz.encuestaefqm.bean.MediaBean;
+import com.teide.aortiz.encuestaefqm.bean.MediaResponsableBean;
 import com.teide.aortiz.encuestaefqm.util.DataExtraction;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -42,6 +45,12 @@ public class DataBaseUtil {
                                                           "having ciclo=? and curso=? and tipo='S' and respuesta=?";
     public static final String COUNT_ANSWER = "select count(respuesta),ciclo,curso,tipo from pregunta group by num,nombreResponsable,ciclo,curso\n" +
                                               "having ciclo=? and curso=? and tipo='S'";
+    public static final String OBTAIN_RESPONSABLE = "select nombreResponsable,ciclo from encuestado where curso=? and tipoResponsable=? "
+                                                + "and nombreResponsable <> ? order by nombreResponsable";
+    public static final String OBTAIN_MEDIA_PROFESOR = "select num,media from media where nombreResponsable=? and ciclo=? "
+            + "and curso=? and tipoResponsable='P'";
+    public static final String OBTAIN_COMENTARIOS = "select respuesta,ciclo from pregunta where tipo='T' and nombreResponsable=? and curso=? order by ciclo";
+    
     
     private Connection conection;
     
@@ -327,5 +336,85 @@ public class DataBaseUtil {
         return total;
     }
     
+    /**
+     * Permite obtener el listado de responsables (Profesores, Directivos, Secretaría u Orientación).
+     * @param curso representa el curso
+     * @param tipo representa el tipo de responsable que se quiere obtener
+     * @return el listado de responsables de ese tipo y para ese curso
+     * @throws SQLException 
+     */
+    private ArrayList<ResponsableBean> obtenerResponsables (String curso, String tipo) throws SQLException {
+        ArrayList<ResponsableBean> listado = new ArrayList<>();
+        PreparedStatement ps = conection.prepareStatement(DataBaseUtil.OBTAIN_RESPONSABLE);
+        ps.setString(1, curso);
+        ps.setString(2, tipo);
+        ps.setString(3, tipo);
+        ResultSet rs = ps.executeQuery();
+        while (rs.next()) {
+            ResponsableBean eb = new ResponsableBean();
+            eb.setNombreResponsable(rs.getString("nombreResponsable"));
+            eb.setCiclo(rs.getString("ciclo"));
+            listado.add(eb);
+        }
+        return listado;
+    }
+    
+    /**
+     * Permite obtener el listado de Profesores de un curso dado.
+     * @param curso representa el curso del que se quieren obtener los profesores
+     * @return el listado de profesores
+     * @throws SQLException 
+     */
+    public ArrayList<ResponsableBean> obtenerProfesores (String curso) throws SQLException {
+        return obtenerResponsables(curso, "P");
+    }
+    
+    public ArrayList<MediaResponsableBean> obtenerMediasProfesores (String nombreResponsable, String ciclo, String curso) throws SQLException {
+        ArrayList<MediaResponsableBean> listado = new ArrayList<>();
+        PreparedStatement ps = conection.prepareStatement(DataBaseUtil.OBTAIN_MEDIA_PROFESOR);
+        ps.setString(1, nombreResponsable);
+        ps.setString(2, ciclo);
+        ps.setString(3, curso);
+        ResultSet rs = ps.executeQuery();
+        while (rs.next()) {
+            MediaResponsableBean mrb = new MediaResponsableBean();
+            mrb.setNum(rs.getInt("num"));
+            mrb.setMedia(rs.getDouble("media"));
+            listado.add(mrb);
+        }
+        return listado;
+    }
+    
+    /**
+     * Permite obtener el listado de comentarios de texto libre de todos (Profesores, Directivos, Secretaría u Orientación).
+     * @param nombreResponsable representa el nombre de responsable (tipo) de comentarios que se quiere obtener
+     * @param curso representa el curso
+     * @return el listado de comentarios de ese tipo y para ese curso
+     * @throws SQLException 
+     */
+    private ArrayList<ComentariosBean> obtenerComentarios (String nombreResponsable, String curso) throws SQLException {
+        ArrayList<ComentariosBean> listado = new ArrayList<>();
+        PreparedStatement ps = conection.prepareStatement(DataBaseUtil.OBTAIN_COMENTARIOS);
+        ps.setString(1, nombreResponsable);
+        ps.setString(2, curso);
+        ResultSet rs = ps.executeQuery();
+        while (rs.next()) {
+            ComentariosBean cb = new ComentariosBean();
+            cb.setComentario(rs.getString("respuesta"));
+            cb.setCiclo(rs.getString("ciclo"));
+            listado.add(cb);
+        }
+        return listado;
+    }
+    
+    /**
+     * Permite obtener el listaod de comentarios de profesores
+     * @param curso representa el curso
+     * @return el listado de comentarios de profesores para ese curso
+     * @throws SQLException 
+     */
+    public ArrayList<ComentariosBean> obtenerComentariosProfesores (String curso) throws SQLException {
+        return obtenerComentarios("P", curso);
+    }
     
 }

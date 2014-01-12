@@ -8,6 +8,7 @@ package com.teide.aortiz.encuestaefqm;
 
 import com.teide.aortiz.encuestaefqm.bean.bbdd.DataBaseUtil;
 import com.teide.aortiz.encuestaefqm.util.DataExtraction;
+import com.teide.aortiz.encuestaefqm.util.ExcelUtil;
 import java.io.File;
 import java.sql.SQLException;
 import javax.swing.JFileChooser;
@@ -19,6 +20,8 @@ import javax.swing.JOptionPane;
  */
 public class PrincipalFrame extends javax.swing.JFrame {
 
+    public static final String DIR_GENERADOS = "Generados";
+    
     /**
      * Creates new form PrincipalFrame
      */
@@ -121,21 +124,38 @@ public class PrincipalFrame extends javax.swing.JFrame {
                 area.append("--------------------------------------------------\n");
 
                 File dir = jfc.getSelectedFile();
+                
+                //Creamos la carpeta GENERADOS donde almacenar todos los Excel
+                crearDirectorio(dir);
+                                
                 String[] ficheros = dir.list();
                 for (String nombreFichero : ficheros) {
                     File fichero = new File (dir,nombreFichero);
                     //Solamente nos valdrán los ficheros con extesión CSV
                     if (fichero.isFile() && obtenerExtensionFichero(fichero).equalsIgnoreCase("csv")) {
                         area.append("Procesando el fichero "+fichero.getName()+"\n");
-                        gestionaEncuesta(fichero, año.getText());
+                        //gestionaEncuesta(fichero, año.getText());
                         area.append("Fichero procesado\n");
                         area.append("--------------------------------------------------\n");
                     }
                 }
+                
+                //Una vez finalizada la gesión de todos los ficheros, comenzaremos con la creación de los Excel
+                gestionarExcel(año.getText(), dir.getAbsolutePath()+"/"+DIR_GENERADOS );
             }
         }
     }//GEN-LAST:event_btnSeleccionarActionPerformed
 
+    /**
+     * Este método permtite generar la carpeta en la que se volcarán todos los Excel generados
+     * @param f representa el fichero CSV que permitirá obtener la ruta en la que se encuentra
+     * para así generar la carpeta en esa ruta
+     */
+    private void crearDirectorio (File f) {
+        File dir = new File (f.getAbsolutePath()+"/"+DIR_GENERADOS);
+        if (!dir.isDirectory()) dir.mkdir();
+    }
+    
     private String obtenerExtensionFichero (File f) {
         try {
             return (f.getName().split("\\."))[1];
@@ -215,11 +235,39 @@ public class PrincipalFrame extends javax.swing.JFrame {
                 case 4: area.append("Error al insertar las medias de tipo Likert de "+de.getCiclo()+"("+de.getCurso()+")\n");break;
                 case 5: area.append("Error al insertar las medias de tipo SI/NO de "+de.getCiclo()+"("+de.getCurso()+")\n");break;
             }
-            ex.printStackTrace();
         }
         catch (Exception ex) {
             JOptionPane.showMessageDialog(this, "Error\n"+ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
+    }
+    
+    private void gestionarExcel (String curso, String directorio) {
+        try {
+            ExcelUtil eu = new ExcelUtil(directorio);
+            area.append("Creando el Excel de Profesores\n");
+            gestionarExcelProfesores(curso, eu);
+            area.append("Excel de Profesores creado correctamente\n");
+            area.append("--------------------------------------------------\n");
+            area.append("Creando el Excel de Comentarios de Profesores\n");
+            gestionarExcelComentariosProfesores(curso, eu);
+            area.append("Excel de Comentarios de Profesores creado correctamente\n");
+            area.append("--------------------------------------------------\n");
+            area.append("Creando el Excel de Equipo Directivo\n");
+            
+            
+        }
+        catch (Exception e) {
+           JOptionPane.showMessageDialog(this, "Error durante la creación de las hojas Excel", "Error", JOptionPane.ERROR_MESSAGE);
+           e.printStackTrace();
+        }
+    }
+    
+    private void gestionarExcelProfesores (String curso, ExcelUtil eu) throws Exception {
+        eu.hojaProfesores(curso);
+    }
+    
+    private void gestionarExcelComentariosProfesores (String curso, ExcelUtil eu) throws Exception {
+        eu.hojaComentariosProfesores(curso);
     }
     
     /**
