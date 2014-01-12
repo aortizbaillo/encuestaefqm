@@ -45,10 +45,12 @@ public class DataBaseUtil {
                                                           "having ciclo=? and curso=? and tipo='S' and respuesta=?";
     public static final String COUNT_ANSWER = "select count(respuesta),ciclo,curso,tipo from pregunta group by num,nombreResponsable,ciclo,curso\n" +
                                               "having ciclo=? and curso=? and tipo='S'";
-    public static final String OBTAIN_RESPONSABLE = "select nombreResponsable,ciclo from encuestado where curso=? and tipoResponsable=? "
+    public static final String OBTAIN_RESPONSABLE_CON_FILTRO = "select nombreResponsable,ciclo from encuestado where curso=? and tipoResponsable=? "
                                                 + "and nombreResponsable <> ? order by nombreResponsable";
-    public static final String OBTAIN_MEDIA_PROFESOR = "select num,media from media where nombreResponsable=? and ciclo=? "
-            + "and curso=? and tipoResponsable='P'";
+    public static final String OBTAIN_RESPONSABLE_SIN_FILTRO = "select nombreResponsable,ciclo from encuestado where curso=? and tipoResponsable=? "
+                                                + "order by nombreResponsable";
+    public static final String OBTAIN_MEDIA_RESPONSABLE = "select num,media,respuesta from media where nombreResponsable=? and ciclo=? "
+            + "and curso=? and tipoResponsable=? and tipo=? order by num";
     public static final String OBTAIN_COMENTARIOS = "select respuesta,ciclo from pregunta where tipo='T' and nombreResponsable=? and curso=? order by ciclo";
     
     
@@ -343,12 +345,14 @@ public class DataBaseUtil {
      * @return el listado de responsables de ese tipo y para ese curso
      * @throws SQLException 
      */
-    private ArrayList<ResponsableBean> obtenerResponsables (String curso, String tipo) throws SQLException {
+    private ArrayList<ResponsableBean> obtenerResponsables (String curso, String tipo, boolean filtro) throws SQLException {
         ArrayList<ResponsableBean> listado = new ArrayList<>();
-        PreparedStatement ps = conection.prepareStatement(DataBaseUtil.OBTAIN_RESPONSABLE);
+        PreparedStatement ps;
+        if (filtro) ps = conection.prepareStatement(DataBaseUtil.OBTAIN_RESPONSABLE_CON_FILTRO);
+        else ps = conection.prepareStatement(DataBaseUtil.OBTAIN_RESPONSABLE_SIN_FILTRO);
         ps.setString(1, curso);
         ps.setString(2, tipo);
-        ps.setString(3, tipo);
+        if (filtro) ps.setString(3, tipo);
         ResultSet rs = ps.executeQuery();
         while (rs.next()) {
             ResponsableBean eb = new ResponsableBean();
@@ -366,23 +370,58 @@ public class DataBaseUtil {
      * @throws SQLException 
      */
     public ArrayList<ResponsableBean> obtenerProfesores (String curso) throws SQLException {
-        return obtenerResponsables(curso, "P");
+        return obtenerResponsables(curso, "P", true);
     }
     
-    public ArrayList<MediaResponsableBean> obtenerMediasProfesores (String nombreResponsable, String ciclo, String curso) throws SQLException {
+    /**
+     * Permite obtener el listado de Equipo Directivo de un curso dado.
+     * @param curso representa el curso del que se quieren obtener los responsables del Equipo Directivo
+     * @return el listado de equipo directivo
+     * @throws SQLException 
+     */
+    public ArrayList<ResponsableBean> obtenerEquipoDirectivo (String curso) throws SQLException {
+        return obtenerResponsables(curso, "D", false);
+    }
+    
+    /**
+     * Este método permite obtener la media de cualquier tipo de responsable (Profesor, E.Directivo, Secretaría u Orientación)
+     * @param nombreResponsable representa el nombre del responsable
+     * @param ciclo representa el ciclo
+     * @param curso representa el curso
+     * @param tipoResponsable representa el tipo de responsable
+     * @return sus medias
+     * @throws SQLException 
+     */
+    private ArrayList<MediaResponsableBean> obtenerMediasResponsables (String nombreResponsable, String ciclo, String curso, String tipoResponsable,
+            String tipo) throws SQLException {
         ArrayList<MediaResponsableBean> listado = new ArrayList<>();
-        PreparedStatement ps = conection.prepareStatement(DataBaseUtil.OBTAIN_MEDIA_PROFESOR);
+        PreparedStatement ps = conection.prepareStatement(DataBaseUtil.OBTAIN_MEDIA_RESPONSABLE);
         ps.setString(1, nombreResponsable);
         ps.setString(2, ciclo);
         ps.setString(3, curso);
+        ps.setString(4, tipoResponsable);
+        ps.setString(5, tipo);
         ResultSet rs = ps.executeQuery();
         while (rs.next()) {
             MediaResponsableBean mrb = new MediaResponsableBean();
             mrb.setNum(rs.getInt("num"));
             mrb.setMedia(rs.getDouble("media"));
+            mrb.setRespuesta(rs.getString("respuesta"));
             listado.add(mrb);
         }
         return listado;
+    }
+    
+    public ArrayList<MediaResponsableBean> obtenerMediasProfesores (String nombreResponsable, String ciclo, String curso) throws SQLException {
+        return obtenerMediasResponsables(nombreResponsable, ciclo, curso, "P","L");
+    }
+    
+    public ArrayList<MediaResponsableBean> obtenerMediasEquipoDirectivo (String nombreResponsable, String ciclo, String curso) throws SQLException {
+        return obtenerMediasResponsables(nombreResponsable, ciclo, curso, "D","L");
+    }
+    
+    public ArrayList<MediaResponsableBean> obtenerMediasEquipoDirectivoGenerico (String nombreResponsable, String ciclo, String curso) throws SQLException {
+        return obtenerMediasResponsables(nombreResponsable, ciclo, curso, "D","S");
     }
     
     /**
@@ -417,4 +456,13 @@ public class DataBaseUtil {
         return obtenerComentarios("P", curso);
     }
     
+    /**
+     * Permite obtener el listaod de comentarios de Equipo Directivo
+     * @param curso representa el curso
+     * @return el listado de comentarios de profesores para ese curso
+     * @throws SQLException 
+     */
+    public ArrayList<ComentariosBean> obtenerComentariosEquipoDirectivo (String curso) throws SQLException {
+        return obtenerComentarios("D", curso);
+    }
 }

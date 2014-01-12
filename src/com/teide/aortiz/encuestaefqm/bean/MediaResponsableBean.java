@@ -14,12 +14,14 @@ public class MediaResponsableBean {
     
     private int num;
     private double media;
-
+    private String respuesta;
+    
     public MediaResponsableBean() {
     }
 
-    public MediaResponsableBean(int num, double media) {
+    public MediaResponsableBean(int num, String respuesta, double media) {
         this.num = num;
+        this.respuesta = respuesta;
         this.media = media;
     }
 
@@ -38,7 +40,12 @@ public class MediaResponsableBean {
     public void setMedia(double media) {
         this.media = media;
     }
-    
-    
-    
+
+    public String getRespuesta() {
+        return respuesta;
+    }
+
+    public void setRespuesta(String respuesta) {
+        this.respuesta = respuesta;
+    }    
 }
