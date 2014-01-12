@@ -363,24 +363,16 @@ public class DataBaseUtil {
         return listado;
     }
     
-    /**
-     * Permite obtener el listado de Profesores de un curso dado.
-     * @param curso representa el curso del que se quieren obtener los profesores
-     * @return el listado de profesores
-     * @throws SQLException 
-     */
     public ArrayList<ResponsableBean> obtenerProfesores (String curso) throws SQLException {
         return obtenerResponsables(curso, "P", true);
     }
     
-    /**
-     * Permite obtener el listado de Equipo Directivo de un curso dado.
-     * @param curso representa el curso del que se quieren obtener los responsables del Equipo Directivo
-     * @return el listado de equipo directivo
-     * @throws SQLException 
-     */
     public ArrayList<ResponsableBean> obtenerEquipoDirectivo (String curso) throws SQLException {
         return obtenerResponsables(curso, "D", false);
+    }
+    
+    public ArrayList<ResponsableBean> obtenerSecretaria (String curso) throws SQLException {
+        return obtenerResponsables(curso, "S", false);
     }
     
     /**
@@ -424,6 +416,14 @@ public class DataBaseUtil {
         return obtenerMediasResponsables(nombreResponsable, ciclo, curso, "D","S");
     }
     
+    public ArrayList<MediaResponsableBean> obtenerMediasSecretaria (String nombreResponsable, String ciclo, String curso) throws SQLException {
+        return obtenerMediasResponsables(nombreResponsable, ciclo, curso, "S","L");
+    }
+    
+    public ArrayList<MediaResponsableBean> obtenerMediasSecretariaGenerico (String nombreResponsable, String ciclo, String curso) throws SQLException {
+        return obtenerMediasResponsables(nombreResponsable, ciclo, curso, "S","S");
+    }
+    
     /**
      * Permite obtener el listado de comentarios de texto libre de todos (Profesores, Directivos, Secretaría u Orientación).
      * @param nombreResponsable representa el nombre de responsable (tipo) de comentarios que se quiere obtener
@@ -446,23 +446,15 @@ public class DataBaseUtil {
         return listado;
     }
     
-    /**
-     * Permite obtener el listaod de comentarios de profesores
-     * @param curso representa el curso
-     * @return el listado de comentarios de profesores para ese curso
-     * @throws SQLException 
-     */
     public ArrayList<ComentariosBean> obtenerComentariosProfesores (String curso) throws SQLException {
         return obtenerComentarios("P", curso);
     }
     
-    /**
-     * Permite obtener el listaod de comentarios de Equipo Directivo
-     * @param curso representa el curso
-     * @return el listado de comentarios de profesores para ese curso
-     * @throws SQLException 
-     */
     public ArrayList<ComentariosBean> obtenerComentariosEquipoDirectivo (String curso) throws SQLException {
         return obtenerComentarios("D", curso);
+    }
+    
+    public ArrayList<ComentariosBean> obtenerComentariosSecretaria (String curso) throws SQLException {
+        return obtenerComentarios("S", curso);
     }
 }

@@ -260,6 +260,14 @@ public class PrincipalFrame extends javax.swing.JFrame {
             gestionarExcelComentariosEquipoDirectivo(curso, eu);
             area.append("Excel de Comentarios de Equipo Directivo creado correctamente\n");
             area.append("--------------------------------------------------\n");
+            area.append("Creando el Excel de Secretaria\n");
+            gestionarExcelSecretaria(curso, eu);
+            area.append("Excel de Secretaria creado correctamente\n");
+            area.append("--------------------------------------------------\n");
+            area.append("Creando el Excel de Comentarios de Secretaria\n");
+            gestionarExcelComentariosSecretaria(curso, eu);
+            area.append("Excel de Comentarios de Secretaria creado correctamente\n");
+            area.append("--------------------------------------------------\n");
         }
         catch (Exception e) {
            JOptionPane.showMessageDialog(this, "Error durante la creación de las hojas Excel", "Error", JOptionPane.ERROR_MESSAGE);
@@ -281,6 +289,14 @@ public class PrincipalFrame extends javax.swing.JFrame {
     
      private void gestionarExcelComentariosEquipoDirectivo (String curso, ExcelUtil eu) throws Exception {
         eu.hojaComentariosEquipoDirectivo(curso);
+    }
+     
+    private void gestionarExcelSecretaria (String curso, ExcelUtil eu) throws Exception {
+        eu.hojaSecretaria(curso);
+    }
+    
+     private void gestionarExcelComentariosSecretaria (String curso, ExcelUtil eu) throws Exception {
+        eu.hojaComentariosSecretaria(curso);
     }
     /**
      * @param args the command line arguments
