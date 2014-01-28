@@ -134,7 +134,7 @@ public class PrincipalFrame extends javax.swing.JFrame {
                     //Solamente nos valdrán los ficheros con extesión CSV
                     if (fichero.isFile() && obtenerExtensionFichero(fichero).equalsIgnoreCase("csv")) {
                         area.append("Procesando el fichero "+fichero.getName()+"\n");
-                        //gestionaEncuesta(fichero, año.getText());
+                        gestionaEncuesta(fichero, año.getText());
                         area.append("Fichero procesado\n");
                         area.append("--------------------------------------------------\n");
                     }
