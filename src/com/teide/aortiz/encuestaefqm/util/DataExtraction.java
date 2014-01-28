@@ -203,9 +203,6 @@ public class DataExtraction {
                         String nombreResponsable = obtenerNombreResponsableParaInsertar(i, j, pb);
                         //Insertaremos en BBDD siempre y cuando haya respuesta
                         //Así evitaremos insertar respuestas tipo texto sin información
-                        System.out.println("**********************");
-                        System.out.println(pb.getPregunta()+" "+pb.getTipo()+" "+nombreResponsable+" "+respuestasPorTipo.get(j));
-                        
                         if (!respuestasPorTipo.get(j).trim().isEmpty()) 
                             dbu.insertaPregunta(pb.getPregunta(), pb.getTipo(), respuestasPorTipo.get(j), ciclo, curso,nombreResponsable, TIPOS_USUARIOS_ANALIZADOS[i]);
                     }
