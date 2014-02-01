@@ -100,7 +100,7 @@ public class ExcelUtil {
             double mediaPorCiclo = 0;
             for (MediaResponsableBean mrb : mediasProfesor) {
                 fila++;
-                Label num = new Label(0, fila, String.valueOf(mrb.getNum()));
+                Label num = new Label(0, fila, PreguntasUtil.obtenerTextoPregunta("P", mrb.getNum()));
                 sheet.addCell(num);
                 Number media;
                 if (mrb.getMedia()<=CALIFICACION_ROJA)  media = new Number(columna, fila, mrb.getMedia(), formatRojo);
@@ -282,10 +282,10 @@ public class ExcelUtil {
                 Label num;
                 
                 //Añadimos si la respuesta es SI o NO
-                if (mrb.getRespuesta()== null) num = new Label(0, fila, String.valueOf(mrb.getNum()));
+                if (mrb.getRespuesta()== null) num = new Label(0, fila, PreguntasUtil.obtenerTextoPregunta("D", mrb.getNum()));
                 else {
-                    if (mrb.getRespuesta().equals("1")) num = new Label(0, fila, String.valueOf(mrb.getNum()+" - SI"));
-                    else num = new Label(0, fila, String.valueOf(mrb.getNum()+" - NO"));
+                    if (mrb.getRespuesta().equals("1")) num = new Label(0, fila, PreguntasUtil.obtenerTextoPregunta("D", mrb.getNum())+" - SI");
+                    else num = new Label(0, fila, PreguntasUtil.obtenerTextoPregunta("D", mrb.getNum())+" - NO");
                 }
                 sheet.addCell(num);
                 Number media;
@@ -419,10 +419,10 @@ public class ExcelUtil {
                 Label num;
                 
                 //Añadimos si la respuesta es SI o NO
-                if (mrb.getRespuesta()== null) num = new Label(0, fila, String.valueOf(mrb.getNum()));
+                if (mrb.getRespuesta()== null) num = new Label(0, fila, PreguntasUtil.obtenerTextoPregunta("S", mrb.getNum()));
                 else {
-                    if (mrb.getRespuesta().equals("1")) num = new Label(0, fila, String.valueOf(mrb.getNum()+" - SI"));
-                    else num = new Label(0, fila, String.valueOf(mrb.getNum()+" - NO"));
+                    if (mrb.getRespuesta().equals("1")) num = new Label(0, fila, PreguntasUtil.obtenerTextoPregunta("S", mrb.getNum())+" - SI");
+                    else num = new Label(0, fila, PreguntasUtil.obtenerTextoPregunta("S", mrb.getNum())+" - NO");
                 }
                 sheet.addCell(num);
                 Number media;
@@ -556,10 +556,10 @@ public class ExcelUtil {
                 Label num;
                 
                 //Añadimos si la respuesta es SI o NO
-                if (mrb.getRespuesta()== null) num = new Label(0, fila, String.valueOf(mrb.getNum()));
+                if (mrb.getRespuesta()== null) num = new Label(0, fila, PreguntasUtil.obtenerTextoPregunta("O", mrb.getNum()));
                 else {
-                    if (mrb.getRespuesta().equals("1")) num = new Label(0, fila, String.valueOf(mrb.getNum()+" - SI"));
-                    else num = new Label(0, fila, String.valueOf(mrb.getNum()+" - NO"));
+                    if (mrb.getRespuesta().equals("1")) num = new Label(0, fila, PreguntasUtil.obtenerTextoPregunta("O", mrb.getNum())+" - SI");
+                    else num = new Label(0, fila, PreguntasUtil.obtenerTextoPregunta("O", mrb.getNum())+" - NO");
                 }
                 sheet.addCell(num);
                 Number media;
@@ -588,7 +588,7 @@ public class ExcelUtil {
         workbook.close();
         
         //Por último escribimos las medias por pregunta
-        escribirMediasPorPregunta(HOJA_SECRETARIA);
+        escribirMediasPorPregunta(HOJA_ORIENTACION);
     }
     
     /**
