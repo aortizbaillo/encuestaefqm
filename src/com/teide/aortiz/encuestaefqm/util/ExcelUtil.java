@@ -160,7 +160,7 @@ public class ExcelUtil {
                 double valor = 0;
                 int total = 0;
                 while ( !(celda = sheet.getCell(columna, fila)).getContents().isEmpty()) {
-                    valor+= Double.parseDouble(celda.getContents());
+                    valor+= Double.parseDouble((celda.getContents().split(" ")[0]));
                     total++;
                     columna++;
                 }
@@ -288,9 +288,17 @@ public class ExcelUtil {
                     else num = new Label(0, fila, PreguntasUtil.obtenerTextoPregunta("D", mrb.getNum())+" - NO");
                 }
                 sheet.addCell(num);
-                Number media;
-                if (mrb.getMedia()<=CALIFICACION_ROJA)  media = new Number(columna, fila, mrb.getMedia(), formatRojo);
-                else media = new Number(columna, fila, mrb.getMedia(), formatNormal);
+                Label media;
+                if (mrb.getMedia()<=CALIFICACION_ROJA)  {
+                    //Solamente mostraremos el número de respuestas con necesidades en caso de un responsable no genérico
+                    if (mrb.getRespuesta()==null) media = new Label(columna, fila, mrb.getMedia()+dbu.obtenerNecesidadesDirectivo(rb.getCiclo(), curso), formatRojo);
+                    else media = new Label(columna, fila, String.valueOf(mrb.getMedia()), formatRojo);
+                }
+                else {
+                    //Solamente mostraremos el número de respuestas con necesidades en caso de un responsable no genérico
+                    if (mrb.getRespuesta()==null) media = new Label(columna, fila, mrb.getMedia()+dbu.obtenerNecesidadesDirectivo(rb.getCiclo(), curso), formatNormal);
+                    else media = new Label(columna, fila, String.valueOf(mrb.getMedia()), formatNormal);
+                }
                 sheet.addCell(media);
                 mediaPorCiclo+=mrb.getMedia();
             }
@@ -425,9 +433,17 @@ public class ExcelUtil {
                     else num = new Label(0, fila, PreguntasUtil.obtenerTextoPregunta("S", mrb.getNum())+" - NO");
                 }
                 sheet.addCell(num);
-                Number media;
-                if (mrb.getMedia()<=CALIFICACION_ROJA)  media = new Number(columna, fila, mrb.getMedia(), formatRojo);
-                else media = new Number(columna, fila, mrb.getMedia(), formatNormal);
+                Label media;
+                if (mrb.getMedia()<=CALIFICACION_ROJA) {
+                    //Solamente mostraremos el número de respuestas con necesidades en caso de un responsable no genérico
+                    if (mrb.getRespuesta()==null) media = new Label(columna, fila, mrb.getMedia()+dbu.obtenerNecesidadesSecretaria(rb.getCiclo(), curso), formatRojo);
+                    else media = new Label(columna, fila, String.valueOf(mrb.getMedia()), formatRojo);
+                }
+                else {
+                    //Solamente mostraremos el número de respuestas con necesidades en caso de un responsable no genérico
+                    if (mrb.getRespuesta()==null) media = new Label(columna, fila, mrb.getMedia()+dbu.obtenerNecesidadesSecretaria(rb.getCiclo(), curso), formatNormal);
+                    else media = new Label(columna, fila, String.valueOf(mrb.getMedia()), formatNormal);
+                }
                 sheet.addCell(media);
                 mediaPorCiclo+=mrb.getMedia();
             }
@@ -562,9 +578,17 @@ public class ExcelUtil {
                     else num = new Label(0, fila, PreguntasUtil.obtenerTextoPregunta("O", mrb.getNum())+" - NO");
                 }
                 sheet.addCell(num);
-                Number media;
-                if (mrb.getMedia()<=CALIFICACION_ROJA)  media = new Number(columna, fila, mrb.getMedia(), formatRojo);
-                else media = new Number(columna, fila, mrb.getMedia(), formatNormal);
+                Label media;
+                if (mrb.getMedia()<=CALIFICACION_ROJA) {
+                    //Solamente mostraremos el número de respuestas con necesidades en caso de un responsable no genérico
+                    if (mrb.getRespuesta()==null && mrb.getNum()>3) media = new Label(columna, fila, mrb.getMedia()+dbu.obtenerNecesidadesOrientacion(rb.getCiclo(), curso), formatRojo);
+                    else media = new Label(columna, fila, String.valueOf(mrb.getMedia()), formatRojo);
+                }
+                else {
+                    //Solamente mostraremos el número de respuestas con necesidades en caso de un responsable no genérico
+                    if (mrb.getRespuesta()==null && mrb.getNum()>3) media = new Label(columna, fila, mrb.getMedia()+dbu.obtenerNecesidadesOrientacion(rb.getCiclo(), curso), formatNormal);
+                    else media = new Label(columna, fila, String.valueOf(mrb.getMedia()), formatNormal);
+                }
                 sheet.addCell(media);
                 mediaPorCiclo+=mrb.getMedia();
             }

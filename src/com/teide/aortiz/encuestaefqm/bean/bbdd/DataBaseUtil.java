@@ -52,7 +52,7 @@ public class DataBaseUtil {
     public static final String OBTAIN_MEDIA_RESPONSABLE = "select num,media,respuesta from media where nombreResponsable=? and ciclo=? "
             + "and curso=? and tipoResponsable=? and tipo=? order by num";
     public static final String OBTAIN_COMENTARIOS = "select respuesta,ciclo from pregunta where tipo='T' and nombreResponsable=? and curso=? order by ciclo";
-    
+    public static final String COUNT_NUMBER_QUESTION_BY_KIND = "select count(num) from pregunta where num=? and respuesta=? and tipoResponsable=? and ciclo=? and curso=?";
     
     private Connection conection;
     
@@ -472,5 +472,67 @@ public class DataBaseUtil {
     
     public ArrayList<ComentariosBean> obtenerComentariosOrientacion (String curso) throws SQLException {
         return obtenerComentarios("O", curso);
+    }
+    
+    /**
+     * Este método permite contar las respuestas que aportan los usuarios de un ciclo y curso para conocer los que han necesitado antención
+     * especial ante equipoDirectivo, secretaría u orientación
+     * @param num representa la pregunta llave que permitirá a los clientes indicar si han necesitado atención especial o no
+     * @param respuesta representa la respuesta (SI o NO) que se buscará en cada momento
+     * @param tipoResponsable representa el tipo de Responsable (D,S,O)
+     * @param ciclo representa el ciclo
+     * @param curso representa el curso
+     * @return el número de respuesta de ese tipo
+     * @throws SQLException 
+     */
+    private int obtenerTotalPreguntasConNecesidades (String num, String respuesta, String tipoResponsable, String ciclo, String curso) throws SQLException {
+        PreparedStatement ps = conection.prepareStatement(DataBaseUtil.COUNT_NUMBER_QUESTION_BY_KIND);
+        ps.setString(1, num);
+        ps.setString(2, respuesta);
+        ps.setString(3, tipoResponsable);
+        ps.setString(4, ciclo);
+        ps.setString(5, curso);
+        ResultSet rs = ps.executeQuery();
+        rs.next();
+        return rs.getInt(1);
+    }
+    
+    /**
+     * Este método nos devolverá el número de encuestas que han necesitado la atención especial del equipo directivo con respecto al total
+     * @param ciclo represeta el ciclo
+     * @param curso representa el curso
+     * @return el número de respuestas con atención especial con respecto al total
+     * @throws SQLException 
+     */
+    public String obtenerNecesidadesDirectivo (String ciclo, String curso) throws SQLException {
+        int totalSi = obtenerTotalPreguntasConNecesidades("02", "1" , "D", ciclo, curso);
+        int totalNo = obtenerTotalPreguntasConNecesidades("02", "0" , "D", ciclo, curso);
+        return " ("+totalSi+"/"+(totalSi+totalNo)+")";
+    }
+    
+     /**
+     * Este método nos devolverá el número de encuestas que han necesitado la atención especial de secretaría con respecto al total
+     * @param ciclo represeta el ciclo
+     * @param curso representa el curso
+     * @return el número de respuestas con atención especial con respecto al total
+     * @throws SQLException 
+     */
+    public String obtenerNecesidadesSecretaria (String ciclo, String curso) throws SQLException {
+        int totalSi = obtenerTotalPreguntasConNecesidades("01", "1" , "S", ciclo, curso);
+        int totalNo = obtenerTotalPreguntasConNecesidades("01", "0" , "S", ciclo, curso);
+        return " ("+totalSi+"/"+(totalSi+totalNo)+")";
+    }
+    
+     /**
+     * Este método nos devolverá el número de encuestas que han necesitado la atención especial del equipo de orientación con respecto al total
+     * @param ciclo represeta el ciclo
+     * @param curso representa el curso
+     * @return el número de respuestas con atención especial con respecto al total
+     * @throws SQLException 
+     */
+    public String obtenerNecesidadesOrientacion (String ciclo, String curso) throws SQLException {
+        int totalSi = obtenerTotalPreguntasConNecesidades("03", "1" , "O", ciclo, curso);
+        int totalNo = obtenerTotalPreguntasConNecesidades("03", "0" , "O", ciclo, curso);
+        return " ("+totalSi+"/"+(totalSi+totalNo)+")";
     }
 }
