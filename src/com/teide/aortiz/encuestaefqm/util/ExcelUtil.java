@@ -160,9 +160,9 @@ public class ExcelUtil {
                 double valor = 0;
                 int total = 0;
                 while ( !(celda = sheet.getCell(columna, fila)).getContents().isEmpty()) {
-                    valor+= Double.parseDouble((celda.getContents().split(" ")[0]));
-                    total++;
-                    columna++;
+                        valor+= Double.parseDouble((celda.getContents().split(" ")[0]));
+                        total++;
+                        columna++;
                 }
                 double mediaPregunta = valor/total;
                 Number media;
@@ -275,7 +275,7 @@ public class ExcelUtil {
             //de lo contrario será el Equipo Directivo Genérico
             if (nombre.length() > 1 ) mediasDirectivo = dbu.obtenerMediasEquipoDirectivo(nombre, rb.getCiclo(), curso);
             else mediasDirectivo = dbu.obtenerMediasEquipoDirectivoGenerico(nombre, rb.getCiclo(), curso);
-            
+                        
             double mediaPorCiclo = 0;
             for (MediaResponsableBean mrb : mediasDirectivo) {
                 fila++;
@@ -305,7 +305,7 @@ public class ExcelUtil {
             
             //Añadimos la media por ciclo
             fila++;
-            mediaPorCiclo/=mediasDirectivo.size();
+            if (mediaPorCiclo!=0) mediaPorCiclo/=mediasDirectivo.size();
             Number media;
             if (mediaPorCiclo<=CALIFICACION_ROJA) media = new Number(columna, fila, mediaPorCiclo, formatRojo);
             else media = new Number(columna, fila, mediaPorCiclo, formatNormal);
@@ -322,7 +322,7 @@ public class ExcelUtil {
         workbook.close();
         
         //Por último escribimos las medias por pregunta
-        escribirMediasPorPregunta(HOJA_EQUIPO_DIRECTIVO);
+        //escribirMediasPorPregunta(HOJA_EQUIPO_DIRECTIVO);
     }
     
     /**
