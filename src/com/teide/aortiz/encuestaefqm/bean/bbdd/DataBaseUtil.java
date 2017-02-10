@@ -27,7 +27,7 @@ public class DataBaseUtil {
     public static final String URL = "jdbc:mysql://127.0.0.1:3306/efqm";
     public static final String DRIVER = "com.mysql.jdbc.Driver";
     public static final String USER = "root";
-    public static final String PASSWORD = "chuki";
+    public static final String PASSWORD = "patata";
     
     //Queries
     public static final String INSERT_CICLO = "insert into ciclo values (?,?)";
@@ -39,10 +39,13 @@ public class DataBaseUtil {
     public static final String INSERT_PORCENTAJE = "insert into media (num,tipo,media,respuesta,ciclo,curso,nombreResponsable,tipoResponsable) values (?,?,?,?,?,?,?,?)";
    
     
-    public static final String CALCULATE_MEDIA_BY_QUESTION = "select num,tipo,avg(respuesta),ciclo,curso,nombreResponsable,tipoResponsable from pregunta group by num, nombreResponsable,tipoResponsable,ciclo,curso \n" +
-                                                             "having ciclo=? and curso=? and tipo='L'";
+    public static final String CALCULATE_MEDIA_BY_QUESTION = "select num,tipo,ciclo,curso,nombreResponsable,tipoResponsable from pregunta group by num, nombreResponsable,tipoResponsable,ciclo,curso \n" +
+                                                           "having ciclo=? and curso=? and tipo='L'";
     public static final String CALCULATE_PERCENTAGE = "select num,tipo,count(respuesta),ciclo,curso,nombreResponsable,tipoResponsable from pregunta group by num,nombreResponsable,respuesta,ciclo,curso\n" +
                                                           "having ciclo=? and curso=? and tipo='S' and respuesta=?";
+    public static final String CALCULATE_TOTAL_PUNTUACIONES = "select sum(respuesta) from pregunta where nombreResponsable=? and num=? and ciclo=?";
+    public static final String CALCULATE_NUM_PUNTUACIONES_VALIDAS = "select count(respuesta) from pregunta where nombreResponsable= ? and num=? and "
+                                                                    + "ciclo=? and respuesta != 0";
     public static final String COUNT_ANSWER = "select count(respuesta),ciclo,curso,tipo from pregunta group by num,nombreResponsable,ciclo,curso\n" +
                                               "having ciclo=? and curso=? and tipo='S'";
     public static final String OBTAIN_RESPONSABLE_CON_FILTRO = "select nombreResponsable,ciclo from encuestado where curso=? and tipoResponsable=? "
@@ -210,15 +213,33 @@ public class DataBaseUtil {
      */
     private ArrayList<MediaBean> obtenerMedias (String ciclo, String curso) throws SQLException {
         PreparedStatement ps = conection.prepareStatement(DataBaseUtil.CALCULATE_MEDIA_BY_QUESTION);
+        PreparedStatement psTotal = conection.prepareStatement(DataBaseUtil.CALCULATE_TOTAL_PUNTUACIONES);
+        PreparedStatement psNum = conection.prepareStatement(DataBaseUtil.CALCULATE_NUM_PUNTUACIONES_VALIDAS);
         ps.setString(1, ciclo);
         ps.setString(2, curso);
         ResultSet rs = ps.executeQuery();
         ArrayList<MediaBean> listado = new ArrayList<>();
         while (rs.next()) {
             MediaBean mb = new MediaBean();
+            //Obtenemos la suma de los puntos del profesor
+            psTotal.setString(1, rs.getString("nombreResponsable"));
+            psTotal.setString(2, rs.getString("num"));
+            psTotal.setString(3, rs.getString("ciclo"));
+            ResultSet rsTotal = psTotal.executeQuery();
+            rsTotal.next();
+            int total = rsTotal.getInt(1);
+            
+            //Obtenemos el total de alumnos que han contestado para eliminar a los NS/NC
+            psNum.setString(1, rs.getString("nombreResponsable"));
+            psNum.setString(2, rs.getString("num"));
+            psNum.setString(3, rs.getString("ciclo"));
+            ResultSet rsNum = psNum.executeQuery();
+            rsNum.next();
+            int num = rsNum.getInt(1);
+            
             mb.setNum(rs.getString("num"));
             mb.setTipo(rs.getString("tipo"));
-            mb.setMedia(rs.getDouble("avg(respuesta)"));
+            mb.setMedia((double)total/num);
             mb.setCiclo(rs.getString("ciclo"));
             mb.setCurso(rs.getString("curso"));
             mb.setNombreResponsable(rs.getString("nombreResponsable"));

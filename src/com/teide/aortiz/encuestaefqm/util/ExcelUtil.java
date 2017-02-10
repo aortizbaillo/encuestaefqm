@@ -146,7 +146,7 @@ public class ExcelUtil {
         WritableCellFormat formatNormal = new WritableCellFormat (NumberFormats.FLOAT); 
         WritableCellFormat formatRojo = new WritableCellFormat (NumberFormats.FLOAT); 
         formatRojo.setBackground(Colour.RED);
-        
+                
         //Recorremos todas las hojas para añadir las medias por pregunta
         for (int i=0; i< workbook.getNumberOfSheets(); i++) {
             WritableSheet sheet = workbookCopy.getSheet(i);
@@ -160,9 +160,9 @@ public class ExcelUtil {
                 double valor = 0;
                 int total = 0;
                 while ( !(celda = sheet.getCell(columna, fila)).getContents().isEmpty()) {
-                        valor+= Double.parseDouble((celda.getContents().split(" ")[0]));
-                        total++;
-                        columna++;
+                    valor+= Double.parseDouble((celda.getContents().split(" ")[0]));
+                    total++;
+                    columna++;
                 }
                 double mediaPregunta = valor/total;
                 Number media;
