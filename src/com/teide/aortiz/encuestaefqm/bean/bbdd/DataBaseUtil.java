@@ -57,6 +57,9 @@ public class DataBaseUtil {
     public static final String OBTAIN_COMENTARIOS = "select respuesta,ciclo from pregunta where tipo='T' and nombreResponsable=? and curso=? order by ciclo";
     public static final String COUNT_NUMBER_QUESTION_BY_KIND = "select count(num) from pregunta where num=? and respuesta=? and tipoResponsable=? and ciclo=? and curso=?";
     
+    public static final String[][] ORDER_PREGUNTAS_EQUIPO_DIRECTIVO = {{"1","1"},{"1","0"},{"2","1"},{"2","0"}};
+    public static final String[][] ORDER_PREGUNTAS_ORIENTACION = {{"3","1"},{"3","0"}};
+    
     private Connection conection;
     
     public DataBaseUtil() throws ClassNotFoundException, SQLException{
@@ -438,7 +441,24 @@ public class DataBaseUtil {
     }
     
     public ArrayList<MediaResponsableBean> obtenerMediasEquipoDirectivoGenerico (String nombreResponsable, String ciclo, String curso) throws SQLException {
-        return obtenerMediasResponsables(nombreResponsable, ciclo, curso, "D","S");
+        ArrayList<MediaResponsableBean> listado = obtenerMediasResponsables(nombreResponsable, ciclo, curso, "D","S");
+        //Si están todos los valores los devolvemos
+        if (listado.size() == 4) return listado;
+        
+        //En caso contrario
+        for (int i = 0; i < 4; i++) {
+            //Generamos el posible valor a añadir
+            MediaResponsableBean mrb = new MediaResponsableBean(Integer.parseInt(ORDER_PREGUNTAS_EQUIPO_DIRECTIVO[i][0]), ORDER_PREGUNTAS_EQUIPO_DIRECTIVO[i][1], 0);
+            //Si estamos al final la añadimos
+            if (i==listado.size()) listado.add(mrb);
+            else {
+                if (!(listado.get(i).getNum() == Integer.parseInt(ORDER_PREGUNTAS_EQUIPO_DIRECTIVO[i][0]) &&
+                        listado.get(i).getRespuesta().equals(ORDER_PREGUNTAS_EQUIPO_DIRECTIVO[i][1]))) {
+                    listado.add(i, mrb);
+                }
+            }
+        }
+        return listado;
     }
     
     public ArrayList<MediaResponsableBean> obtenerMediasSecretaria (String nombreResponsable, String ciclo, String curso) throws SQLException {
@@ -454,7 +474,24 @@ public class DataBaseUtil {
     }
     
     public ArrayList<MediaResponsableBean> obtenerMediasOrientacionGenerico (String nombreResponsable, String ciclo, String curso) throws SQLException {
-        return obtenerMediasResponsables(nombreResponsable, ciclo, curso, "O","S");
+        ArrayList<MediaResponsableBean> listado = obtenerMediasResponsables(nombreResponsable, ciclo, curso, "O","S");
+        //Si están todos los valores los devolvemos
+        if (listado.size() == 2) return listado;
+        
+        //En caso contrario
+        for (int i = 0; i < 2; i++) {
+            //Generamos el posible valor a añadir
+            MediaResponsableBean mrb = new MediaResponsableBean(Integer.parseInt(ORDER_PREGUNTAS_ORIENTACION[i][0]), ORDER_PREGUNTAS_ORIENTACION[i][1], 0);
+            //Si estamos al final la añadimos
+            if (i==listado.size()) listado.add(mrb);
+            else {
+                if (!(listado.get(i).getNum() == Integer.parseInt(ORDER_PREGUNTAS_ORIENTACION[i][0]) &&
+                        listado.get(i).getRespuesta().equals(ORDER_PREGUNTAS_ORIENTACION[i][1]))) {
+                    listado.add(i, mrb);
+                }
+            }
+        }
+        return listado;
     }
     
     /**

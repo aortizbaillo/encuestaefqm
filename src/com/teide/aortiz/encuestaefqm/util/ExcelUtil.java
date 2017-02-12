@@ -275,12 +275,10 @@ public class ExcelUtil {
             //de lo contrario será el Equipo Directivo Genérico
             if (nombre.length() > 1 ) mediasDirectivo = dbu.obtenerMediasEquipoDirectivo(nombre, rb.getCiclo(), curso);
             else mediasDirectivo = dbu.obtenerMediasEquipoDirectivoGenerico(nombre, rb.getCiclo(), curso);
-                        
             double mediaPorCiclo = 0;
             for (MediaResponsableBean mrb : mediasDirectivo) {
                 fila++;
                 Label num;
-                
                 //Añadimos si la respuesta es SI o NO
                 if (mrb.getRespuesta()== null) num = new Label(0, fila, PreguntasUtil.obtenerTextoPregunta("D", mrb.getNum()));
                 else {
