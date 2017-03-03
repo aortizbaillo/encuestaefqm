@@ -242,7 +242,8 @@ public class DataBaseUtil {
             
             mb.setNum(rs.getString("num"));
             mb.setTipo(rs.getString("tipo"));
-            mb.setMedia((double)total/num);
+            if (num == 0) mb.setMedia(0);
+            else mb.setMedia((double)total/num);
             mb.setCiclo(rs.getString("ciclo"));
             mb.setCurso(rs.getString("curso"));
             mb.setNombreResponsable(rs.getString("nombreResponsable"));

@@ -226,6 +226,7 @@ public class PrincipalFrame extends javax.swing.JFrame {
             JOptionPane.showMessageDialog(this, "Driver de la BBDD no encontrado", "Error", JOptionPane.ERROR_MESSAGE);
         } 
         catch (SQLException ex) {
+            ex.printStackTrace();
             JOptionPane.showMessageDialog(this, "Error de BBDD\n"+ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
             switch (resultado) {
                 case 0: area.append("Error: "+de.getCiclo()+"("+de.getCurso()+") ya existía\n");break;
